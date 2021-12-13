@@ -117,6 +117,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
+				Headers:               make(map[string]string),
 			},
 			errString: "",
 			remoteConfig: &remote.ClientConfig{
@@ -145,6 +146,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
+				Headers:               make(map[string]string),
 			},
 			errString: "",
 			remoteConfig: &remote.ClientConfig{
@@ -241,6 +243,7 @@ func assertConfig(t *testing.T, actual, expected Config) {
 	assert.Equal(t, expected.FlushPeriod, actual.FlushPeriod)
 	assert.Equal(t, expected.KeepTags, actual.KeepTags)
 	assert.Equal(t, expected.KeepNameTag, expected.KeepNameTag)
+	assert.Equal(t, expected.Headers, actual.Headers)
 }
 
 func assertRemoteConfig(t *testing.T, actual, expected *remote.ClientConfig) {

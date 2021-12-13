@@ -186,12 +186,10 @@ func ParseArg(arg string) (Config, error) {
 		c.KeepNameTag = null.BoolFrom(v)
 	}
 
+	c.Headers = make(map[string]string)
 	if v, ok := params["headers"].(map[string]interface{}); ok {
 		for k, v := range v {
 			if v, ok := v.(string); ok {
-				if c.Headers == nil {
-					c.Headers = make(map[string]string)
-				}
 				c.Headers[k] = v
 			}
 		}
@@ -226,7 +224,7 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 	getEnvMap := func(env map[string]string, prefix string) map[string]string {
 		result := make(map[string]string)
 		for ek, ev := range env {
-			if strings.HasPrefix(ev, prefix) {
+			if strings.HasPrefix(ek, prefix) {
 				k := strings.TrimPrefix(ek, prefix)
 				result[k] = ev
 			}
@@ -286,7 +284,12 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 		}
 	}
 
-	result.Headers = getEnvMap(env, "K6_PROMETHEUS_HEADERS_")
+	envHeaders := getEnvMap(env, "K6_PROMETHEUS_HEADERS_")
+	for k, v := range envHeaders {
+		if _, ok := result.Headers[k]; !ok {
+			result.Headers[k] = v
+		}
+	}
 
 	if arg != "" {
 		argConf, err := ParseArg(arg)
