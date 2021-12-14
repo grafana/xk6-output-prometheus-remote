@@ -286,9 +286,7 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 
 	envHeaders := getEnvMap(env, "K6_PROMETHEUS_HEADERS_")
 	for k, v := range envHeaders {
-		if _, ok := result.Headers[k]; !ok {
-			result.Headers[k] = v
-		}
+		result.Headers[k] = v
 	}
 
 	if arg != "" {

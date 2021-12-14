@@ -180,7 +180,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			errString:    "strconv.ParseBool",
 			remoteConfig: nil,
 		},
-		"remote_write_with_headers": {
+		"remote_write_with_headers_json": {
 			jsonRaw: json.RawMessage(fmt.Sprintf(`{"url":"%s","mapping":"mapping", "headers":{"X-Header":"value"}}`, u.String())),
 			env:     nil,
 			arg:     "",
@@ -211,6 +211,78 @@ func TestConstructRemoteConfig(t *testing.T) {
 				RetryOnRateLimit: false,
 				Headers: map[string]string{
 					"X-Header": "value",
+				},
+			},
+		},
+		"remote_write_with_headers_env": {
+			jsonRaw: json.RawMessage(fmt.Sprintf(`{"url":"%s","mapping":"mapping", "headers":{"X-Header":"value"}}`, u.String())),
+			env: map[string]string{
+				"K6_PROMETHEUS_HEADERS_X-Header": "value_from_env",
+			},
+			arg: "",
+			config: Config{
+				Mapping:               null.NewString("mapping", true),
+				Url:                   null.StringFrom(u.String()),
+				InsecureSkipTLSVerify: null.BoolFrom(true),
+				CACert:                null.NewString("", false),
+				User:                  null.NewString("", false),
+				Password:              null.NewString("", false),
+				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
+				KeepTags:              null.BoolFrom(true),
+				KeepNameTag:           null.BoolFrom(false),
+				Headers: map[string]string{
+					"X-Header": "value_from_env",
+				},
+			},
+			errString: "",
+			remoteConfig: &remote.ClientConfig{
+				URL:     &promConfig.URL{URL: u},
+				Timeout: model.Duration(defaultPrometheusTimeout),
+				HTTPClientConfig: promConfig.HTTPClientConfig{
+					FollowRedirects: true,
+					TLSConfig: promConfig.TLSConfig{
+						InsecureSkipVerify: false,
+					},
+				},
+				RetryOnRateLimit: false,
+				Headers: map[string]string{
+					"X-Header": "value_from_env",
+				},
+			},
+		},
+		"remote_write_with_headers_arg": {
+			jsonRaw: json.RawMessage(fmt.Sprintf(`{"url":"%s","mapping":"mapping", "headers":{"X-Header":"value"}}`, u.String())),
+			env: map[string]string{
+				"K6_PROMETHEUS_HEADERS_X-Header": "value_from_env",
+			},
+			arg: "headers.X-Header=value_from_arg",
+			config: Config{
+				Mapping:               null.NewString("mapping", true),
+				Url:                   null.StringFrom(u.String()),
+				InsecureSkipTLSVerify: null.BoolFrom(true),
+				CACert:                null.NewString("", false),
+				User:                  null.NewString("", false),
+				Password:              null.NewString("", false),
+				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
+				KeepTags:              null.BoolFrom(true),
+				KeepNameTag:           null.BoolFrom(false),
+				Headers: map[string]string{
+					"X-Header": "value_from_arg",
+				},
+			},
+			errString: "",
+			remoteConfig: &remote.ClientConfig{
+				URL:     &promConfig.URL{URL: u},
+				Timeout: model.Duration(defaultPrometheusTimeout),
+				HTTPClientConfig: promConfig.HTTPClientConfig{
+					FollowRedirects: true,
+					TLSConfig: promConfig.TLSConfig{
+						InsecureSkipVerify: false,
+					},
+				},
+				RetryOnRateLimit: false,
+				Headers: map[string]string{
+					"X-Header": "value_from_arg",
 				},
 			},
 		},
