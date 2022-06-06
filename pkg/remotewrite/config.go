@@ -22,9 +22,7 @@ const (
 )
 
 type Config struct {
-	Mapping null.String `json:"mapping" envconfig:"K6_PROMETHEUS_MAPPING"`
-
-	Url null.String `json:"url" envconfig:"K6_PROMETHEUS_REMOTE_URL"` // here, in the name of env variable, we assume that we won't need to distinguish between remote write URL vs remote read URL
+	URL null.String `json:"url" envconfig:"K6_PROMETHEUS_REMOTE_URL"` // here, in the name of env variable, we assume that we won't need to distinguish between remote write URL vs remote read URL
 
 	Headers map[string]string `json:"headers" envconfig:"K6_PROMETHEUS_HEADERS"`
 
@@ -38,13 +36,12 @@ type Config struct {
 
 	KeepTags    null.Bool `json:"keepTags" envconfig:"K6_KEEP_TAGS"`
 	KeepNameTag null.Bool `json:"keepNameTag" envconfig:"K6_KEEP_NAME_TAG"`
-	KeepUrlTag  null.Bool `json:"keepUrlTag" envconfig:"K6_KEEP_URL_TAG"`
+	KeepURLTag  null.Bool `json:"keepUrlTag" envconfig:"K6_KEEP_URL_TAG"`
 }
 
 func NewConfig() Config {
 	return Config{
-		Mapping:               null.StringFrom("prometheus"),
-		Url:                   null.StringFrom("http://localhost:9090/api/v1/write"),
+		URL:                   null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(true),
 		CACert:                null.NewString("", false),
 		User:                  null.NewString("", false),
@@ -52,7 +49,7 @@ func NewConfig() Config {
 		FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 		KeepTags:              null.BoolFrom(true),
 		KeepNameTag:           null.BoolFrom(false),
-		KeepUrlTag:            null.BoolFrom(true),
+		KeepURLTag:            null.BoolFrom(true),
 		Headers:               make(map[string]string),
 	}
 }
@@ -79,7 +76,7 @@ func (conf Config) ConstructRemoteConfig() (*remote.ClientConfig, error) {
 	// TODO: consider if the auth logic should be enforced here
 	// (e.g. if insecureSkipTLSVerify is switched off, then check for non-empty certificate file and auth, etc.)
 
-	u, err := url.Parse(conf.Url.String)
+	u, err := url.Parse(conf.URL.String)
 	if err != nil {
 		return nil, err
 	}
@@ -97,12 +94,8 @@ func (conf Config) ConstructRemoteConfig() (*remote.ClientConfig, error) {
 // From here till the end of the file partial duplicates waiting for config refactor (k6 #883)
 
 func (base Config) Apply(applied Config) Config {
-	if applied.Mapping.Valid {
-		base.Mapping = applied.Mapping
-	}
-
-	if applied.Url.Valid {
-		base.Url = applied.Url
+	if applied.URL.Valid {
+		base.URL = applied.URL
 	}
 
 	if applied.InsecureSkipTLSVerify.Valid {
@@ -133,8 +126,8 @@ func (base Config) Apply(applied Config) Config {
 		base.KeepNameTag = applied.KeepNameTag
 	}
 
-	if applied.KeepUrlTag.Valid {
-		base.KeepUrlTag = applied.KeepUrlTag
+	if applied.KeepURLTag.Valid {
+		base.KeepURLTag = applied.KeepURLTag
 	}
 
 	if len(applied.Headers) > 0 {
@@ -154,12 +147,8 @@ func ParseArg(arg string) (Config, error) {
 		return c, err
 	}
 
-	if v, ok := params["mapping"].(string); ok {
-		c.Mapping = null.StringFrom(v)
-	}
-
 	if v, ok := params["url"].(string); ok {
-		c.Url = null.StringFrom(v)
+		c.URL = null.StringFrom(v)
 	}
 
 	if v, ok := params["insecureSkipTLSVerify"].(bool); ok {
@@ -193,7 +182,7 @@ func ParseArg(arg string) (Config, error) {
 	}
 
 	if v, ok := params["keepUrlTag"].(bool); ok {
-		c.KeepUrlTag = null.BoolFrom(v)
+		c.KeepURLTag = null.BoolFrom(v)
 	}
 
 	c.Headers = make(map[string]string)
@@ -249,12 +238,8 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 		}
 	}
 
-	if mapping, mappingDefined := env["K6_PROMETHEUS_MAPPING"]; mappingDefined {
-		result.Mapping = null.StringFrom(mapping)
-	}
-
 	if url, urlDefined := env["K6_PROMETHEUS_REMOTE_URL"]; urlDefined {
-		result.Url = null.StringFrom(url)
+		result.URL = null.StringFrom(url)
 	}
 
 	if b, err := getEnvBool(env, "K6_PROMETHEUS_INSECURE_SKIP_TLS_VERIFY"); err != nil {
@@ -298,7 +283,7 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 		return result, err
 	} else {
 		if b.Valid {
-			result.KeepUrlTag = b
+			result.KeepURLTag = b
 		}
 	}
 

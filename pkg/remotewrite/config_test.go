@@ -19,7 +19,7 @@ func TestApply(t *testing.T) {
 	t.Parallel()
 
 	fullConfig := Config{
-		Url:                   null.StringFrom("some-url"),
+		URL:                   null.StringFrom("some-url"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		CACert:                null.StringFrom("some-file"),
 		User:                  null.StringFrom("user"),
@@ -33,7 +33,7 @@ func TestApply(t *testing.T) {
 	// Defaults should be overwritten by valid values
 	c := NewConfig()
 	c = c.Apply(fullConfig)
-	assert.Equal(t, fullConfig.Url, c.Url)
+	assert.Equal(t, fullConfig.URL, c.URL)
 	assert.Equal(t, fullConfig.InsecureSkipTLSVerify, c.InsecureSkipTLSVerify)
 	assert.Equal(t, fullConfig.CACert, c.CACert)
 	assert.Equal(t, fullConfig.User, c.User)
@@ -58,21 +58,21 @@ func TestConfigParseArg(t *testing.T) {
 
 	c, err := ParseArg("url=http://prometheus.remote:3412/write")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.URL)
 
 	c, err = ParseArg("url=http://prometheus.remote:3412/write,insecureSkipTLSVerify=false")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.URL)
 	assert.Equal(t, null.BoolFrom(false), c.InsecureSkipTLSVerify)
 
 	c, err = ParseArg("url=https://prometheus.remote:3412/write,caCertFile=f.crt")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("https://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("https://prometheus.remote:3412/write"), c.URL)
 	assert.Equal(t, null.StringFrom("f.crt"), c.CACert)
 
 	c, err = ParseArg("url=https://prometheus.remote:3412/write,insecureSkipTLSVerify=false,caCertFile=f.crt,user=user,password=pass")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("https://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("https://prometheus.remote:3412/write"), c.URL)
 	assert.Equal(t, null.BoolFrom(false), c.InsecureSkipTLSVerify)
 	assert.Equal(t, null.StringFrom("f.crt"), c.CACert)
 	assert.Equal(t, null.StringFrom("user"), c.User)
@@ -80,12 +80,12 @@ func TestConfigParseArg(t *testing.T) {
 
 	c, err = ParseArg("url=http://prometheus.remote:3412/write,flushPeriod=2s")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.URL)
 	assert.Equal(t, types.NullDurationFrom(time.Second*2), c.FlushPeriod)
 
 	c, err = ParseArg("url=http://prometheus.remote:3412/write,headers.X-Header=value")
 	assert.Nil(t, err)
-	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.Url)
+	assert.Equal(t, null.StringFrom("http://prometheus.remote:3412/write"), c.URL)
 	assert.Equal(t, map[string]string{"X-Header": "value"}, c.Headers)
 }
 
@@ -108,8 +108,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			env:     nil,
 			arg:     "",
 			config: Config{
-				Mapping:               null.StringFrom("prometheus"),
-				Url:                   null.StringFrom(u.String()),
+				URL:                   null.StringFrom(u.String()),
 				InsecureSkipTLSVerify: null.BoolFrom(true),
 				CACert:                null.NewString("", false),
 				User:                  null.NewString("", false),
@@ -117,7 +116,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
-				KeepUrlTag:            null.BoolFrom(true),
+				KeepURLTag:            null.BoolFrom(true),
 				Headers:               make(map[string]string),
 			},
 			errString: "",
@@ -138,8 +137,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			env:     map[string]string{"K6_PROMETHEUS_INSECURE_SKIP_TLS_VERIFY": "false", "K6_PROMETHEUS_USER": "u"},
 			arg:     "user=user",
 			config: Config{
-				Mapping:               null.StringFrom("raw"),
-				Url:                   null.StringFrom(u.String()),
+				URL:                   null.StringFrom(u.String()),
 				InsecureSkipTLSVerify: null.BoolFrom(false),
 				CACert:                null.NewString("", false),
 				User:                  null.NewString("user", true),
@@ -147,7 +145,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
-				KeepUrlTag:            null.BoolFrom(true),
+				KeepURLTag:            null.BoolFrom(true),
 				Headers:               make(map[string]string),
 			},
 			errString: "",
@@ -187,8 +185,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			env:     nil,
 			arg:     "",
 			config: Config{
-				Mapping:               null.NewString("mapping", true),
-				Url:                   null.StringFrom(u.String()),
+				URL:                   null.StringFrom(u.String()),
 				InsecureSkipTLSVerify: null.BoolFrom(true),
 				CACert:                null.NewString("", false),
 				User:                  null.NewString("", false),
@@ -196,7 +193,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
-				KeepUrlTag:            null.BoolFrom(true),
+				KeepURLTag:            null.BoolFrom(true),
 				Headers: map[string]string{
 					"X-Header": "value",
 				},
@@ -224,8 +221,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			},
 			arg: "",
 			config: Config{
-				Mapping:               null.NewString("mapping", true),
-				Url:                   null.StringFrom(u.String()),
+				URL:                   null.StringFrom(u.String()),
 				InsecureSkipTLSVerify: null.BoolFrom(true),
 				CACert:                null.NewString("", false),
 				User:                  null.NewString("", false),
@@ -233,7 +229,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
-				KeepUrlTag:            null.BoolFrom(true),
+				KeepURLTag:            null.BoolFrom(true),
 				Headers: map[string]string{
 					"X-Header": "value_from_env",
 				},
@@ -261,8 +257,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 			},
 			arg: "headers.X-Header=value_from_arg",
 			config: Config{
-				Mapping:               null.NewString("mapping", true),
-				Url:                   null.StringFrom(u.String()),
+				URL:                   null.StringFrom(u.String()),
 				InsecureSkipTLSVerify: null.BoolFrom(true),
 				CACert:                null.NewString("", false),
 				User:                  null.NewString("", false),
@@ -270,7 +265,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 				FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 				KeepTags:              null.BoolFrom(true),
 				KeepNameTag:           null.BoolFrom(false),
-				KeepUrlTag:            null.BoolFrom(true),
+				KeepURLTag:            null.BoolFrom(true),
 				Headers: map[string]string{
 					"X-Header": "value_from_arg",
 				},
@@ -311,8 +306,7 @@ func TestConstructRemoteConfig(t *testing.T) {
 }
 
 func assertConfig(t *testing.T, actual, expected Config) {
-	assert.Equal(t, expected.Mapping, actual.Mapping)
-	assert.Equal(t, expected.Url, actual.Url)
+	assert.Equal(t, expected.URL, actual.URL)
 	assert.Equal(t, expected.InsecureSkipTLSVerify, actual.InsecureSkipTLSVerify)
 	assert.Equal(t, expected.CACert, actual.CACert)
 	assert.Equal(t, expected.User, actual.User)
@@ -320,7 +314,7 @@ func assertConfig(t *testing.T, actual, expected Config) {
 	assert.Equal(t, expected.FlushPeriod, actual.FlushPeriod)
 	assert.Equal(t, expected.KeepTags, actual.KeepTags)
 	assert.Equal(t, expected.KeepNameTag, expected.KeepNameTag)
-	assert.Equal(t, expected.KeepUrlTag, expected.KeepUrlTag)
+	assert.Equal(t, expected.KeepURLTag, expected.KeepURLTag)
 	assert.Equal(t, expected.Headers, actual.Headers)
 }
 

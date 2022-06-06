@@ -1,110 +1,112 @@
 package remotewrite
 
 import (
-	"math/rand"
+	"fmt"
 	"testing"
-	"time"
 
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/tsdb"
+	"github.com/prometheus/prometheus/prompb"
 	"github.com/stretchr/testify/assert"
-	"go.k6.io/k6/metrics"
+	"gopkg.in/guregu/null.v3"
 )
 
-// check that ad-hoc optimization doesn't produce wrong values
-func TestTrendAdd(t *testing.T) {
+func TestTagsToLabels(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
-		current  *metrics.Metric
-		s        metrics.Sample
-		expected metrics.TrendSink
+	testCases := map[string]struct {
+		tags   map[string]string
+		config Config
+		labels []prompb.Label
 	}{
-		{
-			current: &metrics.Metric{
-				Sink: &metrics.TrendSink{},
+		"empty-tags": {
+			tags: nil,
+			config: Config{
+				KeepTags:    null.BoolFrom(true),
+				KeepNameTag: null.BoolFrom(false),
 			},
-			s: metrics.Sample{Value: 2},
-			expected: metrics.TrendSink{
-				Values: []float64{2},
-				Count:  1,
-				Min:    2,
-				Max:    2,
-				Sum:    2,
-				Avg:    2,
-				Med:    2,
+			labels: []prompb.Label{},
+		},
+		"name-tag-discard": {
+			tags: map[string]string{"foo": "bar", "name": "nnn"},
+			config: Config{
+				KeepTags:    null.BoolFrom(true),
+				KeepNameTag: null.BoolFrom(false),
+			},
+			labels: []prompb.Label{
+				{Name: "foo", Value: "bar"},
 			},
 		},
-		{
-			current: &metrics.Metric{
-				Sink: &metrics.TrendSink{
-					Values: []float64{8, 3, 1, 7, 4, 2},
-					Count:  6,
-					Min:    1,
-					Max:    8,
-					Sum:    25,
-				},
+		"name-tag-keep": {
+			tags: map[string]string{"foo": "bar", "name": "nnn"},
+			config: Config{
+				KeepTags:    null.BoolFrom(true),
+				KeepNameTag: null.BoolFrom(true),
 			},
-			s: metrics.Sample{Value: 12.3},
-			expected: metrics.TrendSink{
-				Values: []float64{8, 3, 1, 7, 4, 2, 12.3},
-				Count:  7,
-				Min:    1,
-				Max:    12.3,
-				Sum:    37.3,
-				Avg:    37.3 / 7,
-				Med:    7,
+			labels: []prompb.Label{
+				{Name: "foo", Value: "bar"},
+				{Name: "name", Value: "nnn"},
 			},
+		},
+		"url-tag-discard": {
+			tags: map[string]string{"foo": "bar", "url": "uuu"},
+			config: Config{
+				KeepTags:   null.BoolFrom(true),
+				KeepURLTag: null.BoolFrom(false),
+			},
+			labels: []prompb.Label{
+				{Name: "foo", Value: "bar"},
+			},
+		},
+		"url-tag-keep": {
+			tags: map[string]string{"foo": "bar", "url": "uuu"},
+			config: Config{
+				KeepTags:   null.BoolFrom(true),
+				KeepURLTag: null.BoolFrom(true),
+			},
+			labels: []prompb.Label{
+				{Name: "foo", Value: "bar"},
+				{Name: "url", Value: "uuu"},
+			},
+		},
+		"discard-tags": {
+			tags: map[string]string{"foo": "bar", "name": "nnn"},
+			config: Config{
+				KeepTags: null.BoolFrom(false),
+			},
+			labels: []prompb.Label{},
 		},
 	}
 
-	for _, testCase := range testCases {
-		// trendAdd should result in the same values as Sink.Add
-
-		trendAdd(testCase.current, testCase.s)
-		sink := testCase.current.Sink.(*metrics.TrendSink)
-
-		assert.Equal(t, testCase.expected.Count, sink.Count)
-		assert.Equal(t, testCase.expected.Min, sink.Min)
-		assert.Equal(t, testCase.expected.Max, sink.Max)
-		assert.Equal(t, testCase.expected.Sum, sink.Sum)
-		assert.Equal(t, testCase.expected.Avg, sink.Avg)
-		assert.Equal(t, testCase.expected.Med, sink.Med)
-		assert.Equal(t, testCase.expected.Values, sink.Values)
-	}
-}
-
-func BenchmarkTrendAdd(b *testing.B) {
-	benchF := []func(b *testing.B, start metrics.Metric){
-		func(b *testing.B, m metrics.Metric) {
-			b.ResetTimer()
-			rand.Seed(time.Now().Unix())
-
-			for i := 0; i < b.N; i++ {
-				trendAdd(&m, metrics.Sample{Value: rand.Float64() * 1000})
-				sink := m.Sink.(*metrics.TrendSink)
-				p(sink, 0.90)
-				p(sink, 0.95)
+	for name, testCase := range testCases {
+		testCase := testCase
+		t.Run(name, func(t *testing.T) {
+			var tagset tsdb.TagSet
+			if testCase.tags != nil {
+				for k, v := range testCase.tags {
+					tagset = append(tagset, &tsdb.Tag{Key: k, Value: v})
+				}
 			}
-		},
-		func(b *testing.B, start metrics.Metric) {
-			b.ResetTimer()
-			rand.Seed(time.Now().Unix())
+			labels := tagsToLabels(testCase.config, tagset)
 
-			for i := 0; i < b.N; i++ {
-				start.Sink.Add(metrics.Sample{Value: rand.Float64() * 1000})
-				start.Sink.Format(0)
+			assert.Equal(t, len(testCase.labels), len(labels))
+
+			for i := range testCase.labels {
+				var found bool
+
+				// order is not guaranteed ATM
+				for j := range labels {
+					if labels[j].Name == testCase.labels[i].Name {
+						assert.Equal(t, testCase.labels[i].Value, labels[j].Value)
+						found = true
+						break
+					}
+				}
+				if !found {
+					assert.Fail(t, fmt.Sprintf("Not found label %s: \n"+
+						"expected: %v\n"+
+						"actual  : %v", testCase.labels[i].Name, testCase.labels, labels))
+				}
 			}
-		},
+		})
 	}
-
-	start := metrics.Metric{
-		Type: metrics.Trend,
-		Sink: &metrics.TrendSink{},
-	}
-
-	b.Run("trendAdd", func(b *testing.B) {
-		benchF[0](b, start)
-	})
-	b.Run("TrendSink.Add", func(b *testing.B) {
-		benchF[1](b, start)
-	})
 }
