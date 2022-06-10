@@ -44,6 +44,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/spenczar/tdigest v2.1.0+incompatible // indirect
 	github.com/spf13/afero v1.3.4 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect

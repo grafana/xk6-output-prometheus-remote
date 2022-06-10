@@ -27,10 +27,10 @@ type Output struct {
 	config            Config
 	logger            logrus.FieldLogger
 	client            remote.WriteClient
-	periodicCollector *output.PeriodicFlusher
-	periodicFlusher   *output.PeriodicFlusher
 	tsdb              tsdb.Repository
 	tagmap            tsdb.TagMap
+	periodicCollector *output.PeriodicFlusher
+	periodicFlusher   *output.PeriodicFlusher
 }
 
 var _ output.Output = new(Output)
