@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/spenczar/tdigest"
+	"github.com/openhistogram/circonusllhist"
 	"go.k6.io/k6/metrics"
 )
 
@@ -172,24 +172,24 @@ func (rs *RateSeries) Value() float64 {
 type TrendSeries struct {
 	rwm sync.RWMutex
 
-	td       *tdigest.TDigest
-	count    int
-	sum      float64
-	avg      float64
-	max, min float64
+	histogram *circonusllhist.Histogram
+	count     int
+	sum       float64
+	avg       float64
+	max, min  float64
 }
 
 func NewTrendSeries(metric string, tags TagSet) *TimeSeries {
 	s := newTimeSeries(metric, tags)
 	s.Sink = &TrendSeries{
-		td: tdigest.New(),
+		histogram: circonusllhist.New(),
 	}
 	return s
 }
 
 func (t *TrendSeries) Add(v float64) {
 	t.rwm.Lock()
-	t.td.Add(v, 1)
+	t.histogram.RecordValue(v)
 	t.count += 1
 	t.sum += v
 	t.avg = t.sum / float64(t.count)
@@ -217,13 +217,8 @@ func (t *TrendSeries) onRLock(f func() float64) float64 {
 func (t *TrendSeries) Min() float64 { return t.onRLock(func() float64 { return t.min }) }
 func (t *TrendSeries) Max() float64 { return t.onRLock(func() float64 { return t.max }) }
 func (t *TrendSeries) Avg() float64 { return t.onRLock(func() float64 { return t.avg }) }
-
-func (t *TrendSeries) Med() float64 {
-	return t.onRLock(func() float64 { return t.td.Quantile(0.5) })
-}
+func (t *TrendSeries) Med() float64 { return t.P(0.5) }
 
 func (t *TrendSeries) P(pct float64) float64 {
-	// FIXME: the algorithm provided from the library
-	// seems to be not accurate
-	return t.onRLock(func() float64 { return t.td.Quantile(pct) })
+	return t.onRLock(func() float64 { return t.histogram.ValueAtQuantile(pct) })
 }

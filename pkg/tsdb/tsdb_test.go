@@ -94,7 +94,8 @@ func TestTrendSeriesAddPoint(t *testing.T) {
 	assert.Equal(t, float64(1.618), trend.Min())
 	assert.Equal(t, float64(3.14), trend.Max())
 	assert.Equal(t, float64(2.492), math.Round(trend.Avg()*1000)/1000)
-	assert.Equal(t, float64(2.718), trend.Med())
-	assert.Equal(t, float64(3.2244), trend.P(0.90))
-	assert.Equal(t, float64(3.2877), trend.P(0.95))
+	assert.Equal(t, 2.75, trend.Med())    // 2.718
+	assert.Equal(t, 3.17, trend.P(0.90))  // 3.2244
+	assert.Equal(t, 3.185, trend.P(0.95)) // 3.2877
+	assert.Equal(t, 3.197, trend.P(0.99)) // 3.2877
 }
