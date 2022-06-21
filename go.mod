@@ -3,6 +3,7 @@ module github.com/grafana/xk6-output-prometheus-remote
 go 1.17
 
 require (
+	github.com/cespare/xxhash/v2 v2.1.2
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4
 	github.com/kubernetes/helm v2.17.0+incompatible
@@ -19,7 +20,6 @@ require (
 	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15 // indirect
 	github.com/aws/aws-sdk-go v1.40.37 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dennwc/varint v1.0.0 // indirect

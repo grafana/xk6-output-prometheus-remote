@@ -1,10 +1,10 @@
 package tsdb
 
 import (
-	"hash/maphash"
 	"sort"
 	"sync"
 
+	"github.com/cespare/xxhash/v2"
 	"github.com/openhistogram/circonusllhist"
 	"go.k6.io/k6/metrics"
 )
@@ -76,19 +76,16 @@ type Sink interface {
 	Value() float64
 }
 
-// TODO: refactor, maybe something centralized?
-var hasher maphash.Hash
-
 var bytesep = []byte{0xff}
 
 func HashKey(metric string, tags TagSet) uint64 {
+	hasher := xxhash.New()
 	hasher.WriteString(metric)
 	for i := 0; i < len(tags); i++ {
 		hasher.Write(bytesep)
 		hasher.WriteString(tags[i].Key)
 		hasher.Write(bytesep)
 		hasher.WriteString(tags[i].Value)
-		hasher.Write(bytesep)
 	}
 	h := hasher.Sum64()
 	hasher.Reset()
