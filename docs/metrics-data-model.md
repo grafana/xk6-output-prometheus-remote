@@ -1,8 +1,8 @@
 # k6 Time Series
 
-We want to migrate to the time series data model for getting the benefits where we can efficiently identify the combination between a metric and the relative tags.
+We want to introduce the time series concept to k6 for getting the benefit of efficiently identifying the combination between a metric and the relative tags.
 
-It introduces several benefits across the platform:
+A summary of the benefits it brings across the platform:
 
 * It allows executing faster lookups and comparisons by a single value, the ID (hash) of the series.
 * It reduces the storage by allocating just one time a possible combination (the time series) and referencing it in all other places. 
@@ -17,7 +17,7 @@ It introduces several benefits across the platform:
 * Metric (name, type)
 * Time Series (metric, tags)
 * Sample (timestamp, value, time series ref)
-* Tag (aka [k6/1831](https://github.com/grafana/k6/issues/1831))
+* Tag - (aka [k6/1831](https://github.com/grafana/k6/issues/1831))
 
 ```go
 // This is the current k6 Metric polished from the Thresholds dependencies.
@@ -44,9 +44,7 @@ type Sample struct {
 }
 ```
 
-#### Open questions:
-
-* Currently, the metric type is defined by the `metrics.Metric` but the same type handle Thresholds and Sink operation. Should the `TimeSeries` type depend on `Metric`? Or should we wait to split the Sink/Thresholds part in a different struct?
+> **Note**: Tag and Metric without Sink+Threholds are represented here just as a general overview of the potential final data model. Tag is to be considered as [k6/1831](https://github.com/grafana/k6/issues/1831) and it isn't expected to be addressed in the same iteration.
 
 #### IDs
 
@@ -73,13 +71,14 @@ type Repository interface {
 }
 ```
 
-#### Open questions:
+## Samples generation
 
-* Do we require to identify the time series before invoking `metrics.PushIfNotDone`? So, does the sample require to reference the time series? The hypothesis is yes, so we can distribute the computation load across different VUs, so goroutines and potentially CPUs.
+The current sampling process is controlled by the `metrics.PushIfNotDone` method. All the actual callers should resolve the time series from the storage before push a new Sample, or in the event no one is found to create and insert.
+It requires the dependency from the time series database for all the callers (e.g. executors, JavaScript modules).
 
 ## metrics.Ingester
 
-Ingester is responsible for resolving the time series and storing the pointer in the Sample then resolves the relationships between the time series and it sinks the relative metrics.
+Ingester is responsible for resolving the entire set of Sinks impacted from the ingested time series then it adds the Sample's value to the resolved Sinks.
 
 ##### Example
 
