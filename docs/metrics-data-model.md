@@ -22,9 +22,9 @@ A summary of the benefits it brings across the platform:
 ```go
 // This is the current k6 Metric polished from the Thresholds dependencies.
 type Metric struct {
-	Name     string
-	Type     MetricType
-	Contains ValueType
+	name     string
+	type     MetricType
+	contains ValueType
 }
 
 type Tag struct {
@@ -32,9 +32,9 @@ type Tag struct {
 }
 
 type TimeSeries struct {
-	ID uint64 // hash(metric+tags)
-	MetricName string
-	Tags   []Tag
+	id uint64 // hash(metric+tags)
+	metricName string
+	tags   []Tag
 }
 
 type Sample struct {
