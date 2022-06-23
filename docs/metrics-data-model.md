@@ -35,6 +35,7 @@ type TimeSeries struct {
 	id uint64 // hash(metric+tags)
 	metricName string
 	tags   []Tag
+	keys map[string]struct{}
 }
 
 type Sample struct {
