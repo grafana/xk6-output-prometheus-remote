@@ -50,7 +50,8 @@ type TimeSeries struct {
 	tags   []Tag
 
 	// tagIndex provides a resolver by single Tag.
-	tagIndex map[string]struct{}
+	// It links for each Tag's key its related index in the tags slice.
+	tagIndex map[string]int
 }
 
 type Sample struct {
