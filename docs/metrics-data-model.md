@@ -34,7 +34,7 @@ type Tag struct {
 type TimeSeries struct {
 	// hash is a 64bit hash generated
 	// hashing the metric name and the tags set.
-	// The tag set must be sorted to the guarantee the hashing consistency.
+	// The tag set must be sorted to guarantee the hashing consistency.
 	// The value must be consistent across distributed instances.
 	hash uint64 
 
