@@ -80,6 +80,7 @@ func (pm *PrometheusMapping) MapTrend(ms *metricsStorage, sample metrics.Sample,
 
 	s := metric.Sink.(*metrics.TrendSink)
 	aggr := map[string]float64{
+		"count": float64(s.Count),
 		"min":   s.Min,
 		"max":   s.Max,
 		"avg":   s.Avg,
@@ -89,6 +90,18 @@ func (pm *PrometheusMapping) MapTrend(ms *metricsStorage, sample metrics.Sample,
 	}
 
 	return []prompb.TimeSeries{
+		{
+			Labels: append(labels, prompb.Label{
+				Name:  "__name__",
+				Value: fmt.Sprintf("%s%s_count", defaultMetricPrefix, sample.Metric.Name),
+			}),
+			Samples: []prompb.Sample{
+				{
+					Value:     aggr["count"],
+					Timestamp: timestamp.FromTime(sample.Time),
+				},
+			},
+		},
 		{
 			Labels: append(labels, prompb.Label{
 				Name:  "__name__",
