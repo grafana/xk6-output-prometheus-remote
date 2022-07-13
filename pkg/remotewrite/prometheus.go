@@ -74,8 +74,9 @@ func (pm *PrometheusMapping) MapRate(ms *metricsStorage, sample metrics.Sample, 
 func (pm *PrometheusMapping) MapTrend(ms *metricsStorage, sample metrics.Sample, labels []prompb.Label) []prompb.TimeSeries {
 	metric := ms.update(sample, trendAdd)
 
-	// Prometheus metric system does not support Trend so this mapping will store gauges
-	// to keep track of key values.
+	// Prometheus metric system does not support Trend so this mapping will
+	// store a counter for the number of reported values and gauges to keep
+	// track of aggregated values.
 	// TODO: when Prometheus implements support for sparse histograms, re-visit this implementation
 
 	s := metric.Sink.(*metrics.TrendSink)
