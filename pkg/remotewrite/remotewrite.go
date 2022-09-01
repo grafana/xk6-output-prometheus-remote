@@ -131,6 +131,10 @@ func (o *Output) flush() {
 }
 
 func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) []prompb.TimeSeries {
+	// The seen map is required because the samples containers
+	// could have several samples for the same time series
+	// in this way we can aggregate and flush them in a unique value
+	// without overloading the remote write endpoint.
 	seen := make(map[string]struct{})
 
 	for _, samplesContainer := range samplesContainers {
