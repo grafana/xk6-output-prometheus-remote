@@ -7,15 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/prometheus/prometheus/pkg/timestamp"
-	"github.com/prometheus/prometheus/prompb"
-	"github.com/prometheus/prometheus/storage/remote"
-
 	"go.k6.io/k6/metrics"
 	"go.k6.io/k6/output"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto" //nolint:staticcheck
 	"github.com/golang/snappy"
+	"github.com/prometheus/prometheus/pkg/timestamp"
+	"github.com/prometheus/prometheus/prompb"
+	"github.com/prometheus/prometheus/storage/remote"
 	"github.com/sirupsen/logrus"
 )
 
@@ -212,7 +211,7 @@ func (swm seriesWithMeasure) MapPrompb(t time.Time) []prompb.TimeSeries {
 
 	case metrics.Trend:
 		newts = MapTrend(
-			swm.TimeSeries, swm.Latest, swm.Measure.(*metrics.TrendSink))
+			swm.TimeSeries, swm.Latest, swm.Measure.(*trendSink))
 
 	default:
 		panic(fmt.Sprintf("Something is really off, as I cannot recognize the type of metric %s: `%s`", swm.Metric.Name, swm.Metric.Type))
