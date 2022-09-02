@@ -133,14 +133,21 @@ func (o *Output) flush() {
 func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) []prompb.TimeSeries {
 	// The seen map is required because the samples containers
 	// could have several samples for the same time series
-	// in this way we can aggregate and flush them in a unique value
-	// without overloading the remote write endpoint.
+	//  in this way, we can aggregate and flush them in a unique value
+	//  without overloading the remote write endpoint.
+	//
+	// It is also essential because the core generates timestamps
+	// with a higher precision (ns) than Prometheus (ms),
+	// so we need to aggregate all the samples in the same time bucket.
+	// More context can be found in the issue
+	// https://github.com/grafana/xk6-output-prometheus-remote/issues/11
 	seen := make(map[string]struct{})
 
 	for _, samplesContainer := range samplesContainers {
 		samples := samplesContainer.GetSamples()
 
 		for _, sample := range samples {
+			truncTime := sample.Time.Truncate(time.Millisecond)
 			timeSeriesKey := timeSeriesKey(sample.Metric, sample.Tags)
 			swm, ok := o.tsdb[timeSeriesKey]
 			if !ok {
@@ -150,15 +157,39 @@ func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) 
 						Tags:   sample.Tags,
 					},
 					Measure: sinkByType(sample.Metric.Type),
-					Latest:  sample.Time,
+					Latest:  truncTime,
 				}
 				o.tsdb[timeSeriesKey] = swm
+				seen[timeSeriesKey] = struct{}{}
+			} else {
+				// save as a seen item only when the samples have a time greater than
+				// the previous saved, otherwise some implementations
+				// could see it as a duplicate and generate warnings (e.g. Mimir)
+				if truncTime.After(swm.Latest) {
+					swm.Latest = truncTime
+					seen[timeSeriesKey] = struct{}{}
+				}
+
+				// If current == previous:
+				// the current received time before being truncated had a higher precision.
+				// It's fine to aggregate them but we avoid to add to the seen map because:
+				// - in the case it is a new flush operation then we avoid delivering
+				//   for not generating duplicates
+				// - in the case it is in the same operation but across sample containers
+				//   then the time series should be already on the seen map and we can skip
+				//   to re-add it.
+
+				// If current < previous:
+				// - in the case current is a new flush operation, it shouldn't happen,
+				//   for this reason, we can avoid creating a dedicated logic.
+				//   TODO: We should evaluate if it would be better to have a defensive condition
+				//   for handling it, logging a warning or returning an error
+				//   and avoid aggregating the value.
+				// - in the case case current is in the same operation but across sample containers
+				//   it's fine to aggregate
+				//   but same as for the equal condition it can rely on the previous seen value.
 			}
 			swm.Measure.Add(sample)
-			if sample.Time.After(swm.Latest) {
-				swm.Latest = sample.Time
-			}
-			seen[timeSeriesKey] = struct{}{}
 		}
 	}
 
@@ -172,9 +203,15 @@ func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) 
 
 type seriesWithMeasure struct {
 	Measure metrics.Sink
-	Latest  time.Time
 
-	// TImeSeries will be replaced with the native k6 version
+	// Latest tracks the latest time
+	// when the measure has been updated
+	//
+	// TODO: the logic for this value should stay directly
+	// in a method in struct
+	Latest time.Time
+
+	// TimeSeries will be replaced with the native k6 version
 	// when it will be available.
 	TimeSeries
 
