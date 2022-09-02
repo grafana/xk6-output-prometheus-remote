@@ -88,13 +88,14 @@ func (o *Output) flush() {
 
 	defer func() {
 		d := time.Since(start)
+		okmsg := "Successful flushed time series to remote write endpoint"
 		if d > time.Duration(o.config.FlushPeriod.Duration) {
 			// There is no intermediary storage so warn if writing to remote write endpoint becomes too slow
 			o.logger.WithField("nts", nts).
-				Warn(fmt.Sprintf("Remote write took %s while flush period is %s. Some samples may be dropped.",
-					d.String(), o.config.FlushPeriod.String()))
+				Warnf("%s but it took %s while flush period is %s. Some samples may be dropped.",
+					okmsg, d.String(), o.config.FlushPeriod.String())
 		} else {
-			o.logger.WithField("nts", nts).Debug(fmt.Sprintf("Remote write took %s.", d.String()))
+			o.logger.WithField("nts", nts).WithField("took", d).Debug(okmsg)
 		}
 	}()
 
@@ -269,7 +270,7 @@ func sinkByType(mt metrics.MetricType) metrics.Sink {
 	case metrics.Gauge:
 		sink = &metrics.GaugeSink{}
 	case metrics.Trend:
-		sink = &metrics.TrendSink{}
+		sink = &trendSink{}
 	case metrics.Rate:
 		sink = &metrics.RateSink{}
 	default:
