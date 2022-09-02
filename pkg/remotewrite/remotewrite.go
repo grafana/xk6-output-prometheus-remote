@@ -195,9 +195,8 @@ func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) 
 	}
 
 	pbseries := make([]prompb.TimeSeries, 0, len(seen))
-	now := time.Now()
 	for s := range seen {
-		pbseries = append(pbseries, o.tsdb[s].MapPrompb(now)...)
+		pbseries = append(pbseries, o.tsdb[s].MapPrompb()...)
 	}
 	return pbseries
 }
@@ -219,7 +218,7 @@ type seriesWithMeasure struct {
 	// TODO: maybe add some caching for the mapping?
 }
 
-func (swm seriesWithMeasure) MapPrompb(t time.Time) []prompb.TimeSeries {
+func (swm seriesWithMeasure) MapPrompb() []prompb.TimeSeries {
 	var newts []prompb.TimeSeries
 
 	mapMonoSeries := func(s TimeSeries, t time.Time) prompb.TimeSeries {
