@@ -84,7 +84,6 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 	hc := remote.HTTPConfig{
 		Timeout: defaultTimeout,
 	}
-	clientCertificate := true
 
 	// if at least valid user was configured, use basic auth
 	if conf.Username.Valid {
@@ -98,8 +97,8 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 		InsecureSkipVerify: conf.InsecureSkipTLSVerify.Bool, //nolint:gosec
 	}
 
-	if clientCertificate {
-		cert, _ := tls.LoadX509KeyPair("client.crt", "client.key")
+	if conf.ClientCertificate.Valid && conf.ClientCertificateKey.Valid {
+		cert, _ := tls.LoadX509KeyPair(conf.ClientCertificate.String, conf.ClientCertificateKey.String)
 		hc.TLSConfig.Certificates = []tls.Certificate{cert}
 	}
 
