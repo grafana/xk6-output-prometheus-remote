@@ -3612,7 +3612,7 @@
       "type": "row"
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [
@@ -3704,8 +3704,8 @@
     ]
   },
   "time": {
-    "from": "2022-12-16T16:49:11.034Z",
-    "to": "2022-12-16T16:51:55.771Z"
+    "from": "now-5m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "",
