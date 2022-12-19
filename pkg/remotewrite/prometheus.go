@@ -21,7 +21,9 @@ func MapTagSet(t *metrics.TagSet) []*prompb.Label {
 	labels := make([]*prompb.Label, 0, n.Len())
 	for !n.IsRoot() {
 		prev, key, value := n.Data()
-		labels = append(labels, &prompb.Label{Name: key, Value: value})
+		if value != "" {
+			labels = append(labels, &prompb.Label{Name: key, Value: value})
+		}
 		n = prev
 	}
 	return labels
