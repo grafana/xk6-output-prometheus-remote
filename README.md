@@ -32,6 +32,15 @@ K6_PROMETHEUS_RW_PASSWORD=bar \
 ./k6 run -o xk6-prometheus-rw script.js 
 ```
 
+or with client certificate:
+```
+K6_PROMETHEUS_RW_SERVER_URL=https://localhost:9090/api/v1/write \
+K6_PROMETHEUS_RW_INSECURE_SKIP_TLS_VERIFY=false \
+K6_PROMETHEUS_RW_CLIENT_CERTIFICATE=client.crt \
+K6_PROMETHEUS_RW_CLIENT_CERTIFICATE_KEY=client.key \
+./k6 run -o xk6-prometheus-rw script.js
+```
+
 ### Metric types conversions
 
 All the k6 metric types are converted into an equivalent Prometheus' type:
