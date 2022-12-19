@@ -3,18 +3,22 @@ package remote
 import (
 	"context"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
 
+	"github.com/golang/snappy"
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/stale"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	prompb "go.buf.build/grpc/go/prometheus/prometheus"
+	"google.golang.org/protobuf/proto"
 )
 
-func TestNewWrtiteClient(t *testing.T) {
+func TestNewWriteClient(t *testing.T) {
 	t.Parallel()
 	t.Run("DefaultConfig", func(t *testing.T) {
 		t.Parallel()
@@ -88,7 +92,7 @@ func TestClientStore(t *testing.T) {
 func TestClientStoreHTTPError(t *testing.T) {
 	t.Parallel()
 	h := func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "bad bad", http.StatusUnauthorized)
+		http.Error(w, "bad", http.StatusUnauthorized)
 	}
 	ts := httptest.NewServer(http.HandlerFunc(h))
 	defer ts.Close()
@@ -159,6 +163,7 @@ func TestClientStoreHeaders(t *testing.T) {
 }
 
 func TestNewWriteRequestBody(t *testing.T) {
+	t.Parallel()
 	ts := []*prompb.TimeSeries{
 		{
 			Labels:  []*prompb.Label{{Name: "label1", Value: "val1"}},
@@ -169,6 +174,37 @@ func TestNewWriteRequestBody(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, string(b))
 	assert.Contains(t, string(b), `label1`)
+}
+
+func TestNewWriteRequestBodyWithStaleMarker(t *testing.T) {
+	t.Parallel()
+
+	timestamp := time.Date(2022, time.December, 15, 11, 41, 18, 123, time.UTC)
+
+	ts := []*prompb.TimeSeries{
+		{
+			Labels: []*prompb.Label{{Name: "label1", Value: "val1"}},
+			Samples: []*prompb.Sample{{
+				Value:     stale.Marker,
+				Timestamp: timestamp.UnixMilli(),
+			}},
+		},
+	}
+	b, err := newWriteRequestBody(ts)
+	require.NoError(t, err)
+	require.NotEmpty(t, b)
+
+	sb, err := snappy.Decode(nil, b)
+	require.NoError(t, err)
+
+	var series prompb.WriteRequest
+	err = proto.Unmarshal(sb, &series)
+	require.NoError(t, err)
+	require.NotEmpty(t, series.Timeseries[0])
+	require.NotEmpty(t, series.Timeseries[0].Samples)
+
+	assert.True(t, math.IsNaN(series.Timeseries[0].Samples[0].Value))
+	assert.Equal(t, timestamp.UnixMilli(), series.Timeseries[0].Samples[0].Timestamp)
 }
 
 func TestValidateStatusCode(t *testing.T) {
