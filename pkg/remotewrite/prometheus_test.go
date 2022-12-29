@@ -17,12 +17,19 @@ func TestMapSeries(t *testing.T) {
 	t.Parallel()
 
 	r := metrics.NewRegistry()
+	tags := r.RootTagSet().
+		With("tagk1", "tagv1").With("b1", "v1").
+		// labels with empty key or value are not allowed
+		// so they will be not added as labels
+		With("tagEmptyValue", "").
+		With("", "tagEmptyKey")
+
 	series := metrics.TimeSeries{
 		Metric: &metrics.Metric{
 			Name: "test",
 			Type: metrics.Counter,
 		},
-		Tags: r.RootTagSet().With("tagk1", "tagv1").With("b1", "v1"),
+		Tags: tags,
 	}
 
 	lbls := MapSeries(series, "")
@@ -37,7 +44,7 @@ func TestMapSeries(t *testing.T) {
 }
 
 // buildTimeSeries creates a TimSeries with the given name, value and timestamp
-func buildTimeSeries(name string, value float64, timestamp time.Time) *prompb.TimeSeries {
+func buildTimeSeries(name string, value float64, timestamp time.Time) *prompb.TimeSeries { //nolint:unparam
 	return &prompb.TimeSeries{
 		Labels: []*prompb.Label{
 			{
