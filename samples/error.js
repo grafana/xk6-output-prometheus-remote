@@ -26,21 +26,7 @@ export default function () {
   let res = http.get("http://httpbin.org/");
  
 
-  let passed = check(res, { "status is 200": (r) => r.status === 200 });
-
-  // Add one for number of requests
-  myCounter.add(1);
-
-  // Set max response time seen
-  maxResponseTime = Math.max(maxResponseTime, res.timings.duration);
-  myGauge.add(maxResponseTime);
-
-  // Add check success or failure to keep track of rate
-  myRate.add(passed);
-
-  // Keep track of TCP-connecting and TLS handshaking part of the response time
-  myTrend.add(res.timings.connecting + res.timings.tls_handshaking, { my_tag: "I'm a tag" });
-
+//for test error on dashboard
   const responses = http.batch([
     "http://test.k6.io",
     "http://test.k6.io/error.html",
