@@ -1,6 +1,6 @@
 import http from "k6/http";
 import { check } from "k6";
-
+// for test check on dashboard
 export const options = {
   vus: 10,
   duration: '10s',
