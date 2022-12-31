@@ -132,7 +132,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "",
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -242,7 +242,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(histogram_fraction(0, $T, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) \n+ \n(histogram_fraction($T, $T*4, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"})/2))/\nhistogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"})",
+          "expr": "(histogram_fraction(0, $T, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) \n+ \n(histogram_fraction($T, $T*4, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"})/2))/\nhistogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"})",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -257,7 +257,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "",
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -372,7 +372,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(histogram_fraction(0, $T, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) + (histogram_fraction($T, $T*4, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"})/2))/\n\n\nhistogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"})",
+          "expr": "(histogram_fraction(0, $T, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) + (histogram_fraction($T, $T*4, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"})/2))/\n\n\nhistogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"})",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -387,7 +387,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "**Satisfied:** Response time less than or equal to T seconds.",
+      "description": "**Satisfied:** Response time less than or equal to T seconds.\nresponse time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -441,7 +441,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_fraction(0, $T, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) >0",
+          "expr": "histogram_fraction(0, $T, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) >0",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -462,7 +462,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "-   **Tolerating:** Response time between T seconds and 4T seconds.",
+      "description": "-   **Tolerating:** Response time between T seconds and 4T seconds.\nresponse time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -516,7 +516,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_fraction($T, $T*4, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) >0",
+          "expr": "histogram_fraction($T, $T*4, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) >0",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -537,7 +537,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "**Frustrating:** Response time greater than 4 T seconds + Failed.",
+      "description": "**Frustrating:** Response time greater than 4 T seconds + Failed.\nresponse time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -591,7 +591,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_fraction($T*4, 9999999, (k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) > 0",
+          "expr": "histogram_fraction($T*4, 9999999, ($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}))*histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"true\"}) > 0",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -603,7 +603,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_count(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"false\"})",
+          "expr": "histogram_count($metrics{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\",expected_response=\"false\"})",
           "hide": false,
           "legendFormat": "{{name}}",
           "range": true,
@@ -891,6 +891,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -959,7 +960,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum(rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1148,7 +1149,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "",
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1513,7 +1514,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(histogram_sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "avg(histogram_sum(rate($metrics{testid=~\"$testid\"}[$__rate_interval]))\n/\nhistogram_count(rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "hide": false,
           "legendFormat": "Response  Time (avg)",
           "range": true,
@@ -2316,6 +2317,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2855,7 +2857,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0, sum by(name) (rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2868,7 +2870,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.5, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.5, sum by(name) (rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2881,7 +2883,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(name) (rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2894,7 +2896,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(1, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(1, sum by(name) (rate($metrics{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -3217,6 +3219,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3305,7 +3308,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(scenario)(rate($metrics{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -3509,6 +3512,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3771,7 +3775,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "",
+      "description": "response time based on metrics variable",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -4089,7 +4093,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "editorMode": "code",
+          "editorMode": "builder",
           "exemplar": false,
           "expr": "k6_vus{testid=~\"$testid\"}",
           "hide": false,
@@ -4136,7 +4140,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(histogram_sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_seconds{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg(histogram_sum(rate($metrics{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate($metrics{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "legendFormat": "Response  Time",
           "range": true,
@@ -4275,9 +4279,9 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "k6_http_req_waiting_seconds",
-          "value": "k6_http_req_waiting_seconds"
+          "selected": true,
+          "text": "k6_http_req_duration_seconds",
+          "value": "k6_http_req_duration_seconds"
         },
         "description": "Metrics for apdex",
         "hide": 0,
@@ -4286,17 +4290,18 @@
         "name": "metrics",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "k6_http_req_waiting_seconds",
             "value": "k6_http_req_waiting_seconds"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "k6_http_req_duration_seconds",
             "value": "k6_http_req_duration_seconds"
           }
         ],
         "query": "k6_http_req_waiting_seconds, k6_http_req_duration_seconds",
+        "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
       }
@@ -4310,6 +4315,6 @@
   "timezone": "",
   "title": "Test Result",
   "uid": "01npcT44k",
-  "version": 10,
+  "version": 11,
   "weekStart": ""
 }
