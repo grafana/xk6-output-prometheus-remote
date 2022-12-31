@@ -29,7 +29,8 @@ export default function () {
 //for test error on dashboard
   const responses = http.batch([
     "http://test.k6.io",
-    "http://test.k6.io/error.html",
+    "https://httpstat.us/500",
+    "https://httpstat.us/404",
   ]);
 
   check(responses[0], {
