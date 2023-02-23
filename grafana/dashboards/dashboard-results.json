@@ -64,7 +64,7 @@
       }
     ]
   },
-  "description": "k6 Test Result",
+  "description": "Official dashboard for k6 test results in Prometheus.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -462,7 +462,7 @@
           },
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum by(testid) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(testid) (rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1004,7 +1004,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "(histogram_sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval]))) ",
+          "expr": "(histogram_sum(rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval]))) ",
           "hide": false,
           "legendFormat": "Response  Time (avg)  - {{testid}} - {{scenario}} - {{name}}",
           "range": true,
@@ -2511,7 +2511,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0, sum by(name) (rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2524,7 +2524,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.5, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.5, sum by(name) (rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2537,7 +2537,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(name) (rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2550,7 +2550,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(1, sum by(name) (rate(k6_http_req_duration_seconds{testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(1, sum by(name) (rate(k6_http_req_duration_p99{testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -2773,7 +2773,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_blocked_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_blocked_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_blocked_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_blocked_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Blocked - {{testid}}",
@@ -2787,7 +2787,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_connecting_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_connecting_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_connecting_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_connecting_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Connecting - {{testid}}",
@@ -2801,7 +2801,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_duration_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Duration - {{testid}}",
@@ -2815,7 +2815,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_receiving_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_receiving_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_receiving_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_receiving_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Receiving - {{testid}}",
@@ -2829,7 +2829,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_sending_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_sending_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_sending_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_sending_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Sending - {{testid}}",
@@ -2843,7 +2843,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_tls_handshaking_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_tls_handshaking_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_tls_handshaking_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_tls_handshaking_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "TLS Handshaking - {{testid}}",
@@ -2857,7 +2857,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_waiting_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_waiting_seconds{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
+          "expr": "avg by(testid)(histogram_sum(rate(k6_http_req_waiting_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_waiting_p99{testid=~\"$testid\", name=~\"$url\",scenario=~\"$scenario\"}[$__rate_interval])))",
           "hide": false,
           "interval": "",
           "legendFormat": "Waiting - {{testid}}",
@@ -3003,7 +3003,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by(testid)(rate(k6_http_req_duration_seconds{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(testid)(rate(k6_http_req_duration_p99{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
           "format": "table",
           "hide": false,
           "legendFormat": "",
@@ -3303,7 +3303,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.95, sum by(testid)(rate(k6_http_req_duration_seconds{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(testid)(rate(k6_http_req_duration_p99{scenario=~\"$scenario\", expected_response=\"true\", testid=~\"$testid\"}[$__rate_interval])))",
               "format": "table",
               "hide": false,
               "legendFormat": "",
@@ -3806,7 +3806,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(histogram_sum(rate(k6_http_req_duration_seconds{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_seconds{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))) ",
+              "expr": "(histogram_sum(rate(k6_http_req_duration_p99{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))\n/\nhistogram_count(rate(k6_http_req_duration_p99{testid=~\"$testid\",scenario=~\"$scenario\"}[$__rate_interval]))) ",
               "hide": false,
               "legendFormat": "Response  Time (avg)  - {{testid}} - {{scenario}} - {{name}}",
               "range": true,
@@ -3940,8 +3940,8 @@
       {
         "current": {
           "selected": false,
-          "text": "k6_http_req_waiting_seconds",
-          "value": "k6_http_req_waiting_seconds"
+          "text": "k6_http_req_waiting_p99",
+          "value": "k6_http_req_waiting_p99"
         },
         "description": "Metrics for apdex",
         "hide": 0,
@@ -3951,16 +3951,16 @@
         "options": [
           {
             "selected": true,
-            "text": "k6_http_req_waiting_seconds",
-            "value": "k6_http_req_waiting_seconds"
+            "text": "k6_http_req_waiting_p99",
+            "value": "k6_http_req_waiting_p99"
           },
           {
             "selected": false,
-            "text": "k6_http_req_duration_seconds",
-            "value": "k6_http_req_duration_seconds"
+            "text": "k6_http_req_duration_p99",
+            "value": "k6_http_req_duration_p99"
           }
         ],
-        "query": "k6_http_req_waiting_seconds, k6_http_req_duration_seconds",
+        "query": "k6_http_req_waiting_p99, k6_http_req_duration_p99",
         "skipUrlSync": false,
         "type": "custom"
       }
@@ -3972,7 +3972,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Test Result",
+  "title": "k6 Test Results",
   "uid": "01npcT44k",
   "version": 1,
   "weekStart": ""
