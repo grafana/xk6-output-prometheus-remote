@@ -1,14 +1,14 @@
 module github.com/grafana/xk6-output-prometheus-remote
 
-go 1.18
+go 1.19
 
 require (
 	github.com/golang/snappy v0.0.4
 	github.com/mstoykov/atlas v0.0.0-20220811071828-388f114305dd
 	github.com/prometheus/client_golang v1.14.1-0.20221122130035-8b6e68085b10
 	github.com/prometheus/client_model v0.3.0
-	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.2
+	github.com/sirupsen/logrus v1.9.3
+	github.com/stretchr/testify v1.8.4
 	go.buf.build/grpc/go/prometheus/prometheus v1.4.4
 	go.k6.io/k6 v0.44.1
 	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
