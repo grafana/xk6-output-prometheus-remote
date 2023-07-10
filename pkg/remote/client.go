@@ -117,7 +117,7 @@ func newWriteRequestBody(series []*prompb.TimeSeries) ([]byte, error) {
 	}
 	if snappy.MaxEncodedLen(len(b)) < 0 {
 		return nil, fmt.Errorf("the protobuf message is too large to be handled by Snappy encoder; "+
-			"size: %d, limit: %d", len(b), 0xffffffff)
+			"size: %d, limit: %d", len(b), uint(0xffffffff))
 	}
 	return snappy.Encode(nil, b), nil
 }
