@@ -15,7 +15,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "9.4.3"
+      "version": "10.1.2"
     },
     {
       "type": "datasource",
@@ -52,10 +52,10 @@
       }
     ]
   },
-  "description": "List of k6 test runs",
+  "description": "Grafana k6 - Tests List of k6 test runs",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
   "liveNow": true,
@@ -244,6 +244,7 @@
       "id": 2,
       "interval": "5s",
       "options": {
+        "cellHeight": "sm",
         "footer": {
           "countRows": false,
           "fields": "",
@@ -255,7 +256,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "9.4.3",
+      "pluginVersion": "10.1.2",
       "targets": [
         {
           "datasource": {
@@ -499,7 +500,8 @@
   "style": "dark",
   "tags": [
     "prometheus",
-    "k6"
+    "k6",
+    "test-list"
   ],
   "templating": {
     "list": [
@@ -507,7 +509,7 @@
         "current": {
           "selected": false,
           "text": "prometheus",
-          "value": "prometheus"
+          "value": "P1809F7CD0C75ACF3"
         },
         "hide": 0,
         "includeAll": false,
@@ -520,17 +522,28 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P1809F7CD0C75ACF3"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "",
-  "title": "Tests List",
+  "timezone": "browser",
+  "title": "Grafana k6 - Tests List",
   "uid": "UoYDJHJhk",
-  "version": 4,
+  "version": 1,
   "weekStart": ""
 }
