@@ -64,7 +64,7 @@
       }
     ]
   },
-  "description": "Apdex Overview",
+  "description": "Apdex Overview Prometheus Native Histogram",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -615,14 +615,15 @@
       "type": "bargauge"
     }
   ],
-  "refresh": "auto",
+  "refresh": "5s",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
     "prometheus",
     "k6",
-    "apdex"
+    "apdex",
+    "native-histogram"
   ],
   "templating": {
     "list": [
@@ -673,7 +674,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Grafana k6 - Apdex Overview",
+  "title": "Grafana k6 - Apdex Overview  - Prometheus Native Histogram",
   "uid": "01npcT44d",
   "version": 1,
   "weekStart": ""

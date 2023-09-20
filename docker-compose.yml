@@ -10,7 +10,6 @@ services:
     image: prom/prometheus:v2.47.0
     command:
       - --web.enable-remote-write-receiver
-      - --enable-feature=native-histograms
       - --config.file=/etc/prometheus/prometheus.yml
     networks:
       - k6
@@ -41,9 +40,13 @@ services:
       - "6565:6565"
     environment:
       - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
-      - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
       - K6_OUT=xk6-prometheus-rw
+      - K6_PROMETHEUS_RW_STALE_MARKERS=true
+      - K6_PROMETHEUS_RW_TREND_STATS=min,avg,p(95),p(99)
+
     depends_on:
       - prometheus
     volumes:
       - ./samples:/scripts
+    extra_hosts:
+      - "localhost:$DOCKERHOST"

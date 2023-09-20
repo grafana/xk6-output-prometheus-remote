@@ -48,7 +48,6 @@ services:
       - prometheus
     volumes:
       - ./samples:/scripts
-
     extra_hosts:
-      - "dockerhost:$DOCKERHOST"
       - "localhost:$DOCKERHOST"
+

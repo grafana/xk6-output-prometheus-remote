@@ -125,7 +125,7 @@
                   {
                     "targetBlank": true,
                     "title": "",
-                    "url": "http://localhost:3000/d/a4d8f817-bf0e-4772-bfc5-b8d674b9ee66/grafana-k6-test-result?orgId=1&from=${__data.fields['start'].numeric}&to=${__data.fields['end'].numeric}&var-DS_PROMETHEUS=P1809F7CD0C75ACF3&var-Filters=testid%7C%3D%7C${__value.raw}"
+                    "url": "http://localhost:3000/d/01npcT44k/grafana-k6-test-result-prometheus-native-histogram?orgId=1&from=${__data.fields['start'].numeric}&to=${__data.fields['end'].numeric}&var-DS_PROMETHEUS=P1809F7CD0C75ACF3&var-Filters=testid%7C%3D%7C${__value.raw}"
                   }
                 ]
               },
@@ -289,7 +289,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max (k6_http_req_duration_p99{expected_response=\"true\"})",
+          "expr": "histogram_quantile(0.99, sum(rate(k6_http_req_duration_seconds{expected_response=\"true\"}[$__range])))",
           "format": "table",
           "hide": false,
           "legendFormat": "__auto",
@@ -495,14 +495,15 @@
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": "",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
     "prometheus",
     "k6",
-    "test-list"
+    "test-list",
+    "native-histogram"
   ],
   "templating": {
     "list": [
@@ -543,8 +544,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Grafana k6 - Tests List",
-  "uid": "ba209a9a-ee07-4805-a103-e5ad4a493553",
+  "title": "Grafana k6 - Tests List - Prometheus Native Histogram",
+  "uid": "UoYDJHJhk",
   "version": 1,
   "weekStart": ""
 }
