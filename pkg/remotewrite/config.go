@@ -41,10 +41,10 @@ type Config struct {
 	// Password is the Password for the Basic Auth.
 	Password null.String `json:"password"`
 
-	// ClientCertificate for if you want to use them (also requires clientCertificateKey to be set)
+	// ClientCertificate is the public key of the SSL certificate.
 	ClientCertificate null.String `json:"clientCertificate"`
 
-	// ClientCertificateKey for client certificate (also requires clientCertificate to be set)
+	// ClientCertificateKey is the private key of the SSL certificate.
 	ClientCertificateKey null.String `json:"clientCertificateKey"`
 
 	// PushInterval defines the time between flushes. The Output will wait the set time
@@ -74,8 +74,6 @@ func NewConfig() Config {
 		Headers:               make(map[string]string),
 		TrendStats:            defaultTrendStats,
 		StaleMarkers:          null.BoolFrom(false),
-		ClientCertificate:     null.NewString("", false),
-		ClientCertificateKey:  null.NewString("", false),
 	}
 }
 
@@ -250,6 +248,14 @@ func parseEnvs(env map[string]string) (Config, error) {
 		c.Password = null.StringFrom(password)
 	}
 
+	if clientCertificate, certDefined := env["K6_PROMETHEUS_RW_CLIENT_CERTIFICATE"]; certDefined {
+		c.ClientCertificate = null.StringFrom(clientCertificate)
+	}
+
+	if clientCertificateKey, certDefined := env["K6_PROMETHEUS_RW_CLIENT_CERTIFICATE_KEY"]; certDefined {
+		c.ClientCertificateKey = null.StringFrom(clientCertificateKey)
+	}
+
 	envHeaders := getEnvMap(env, "K6_PROMETHEUS_RW_HEADERS_")
 	for k, v := range envHeaders {
 		if c.Headers == nil {
@@ -272,14 +278,6 @@ func parseEnvs(env map[string]string) (Config, error) {
 
 	if trendStats, trendStatsDefined := env["K6_PROMETHEUS_RW_TREND_STATS"]; trendStatsDefined {
 		c.TrendStats = strings.Split(trendStats, ",")
-	}
-
-	if clientCertificate, userDefined := env["K6_PROMETHEUS_RW_CLIENT_CERTIFICATE"]; userDefined {
-		c.ClientCertificate = null.StringFrom(clientCertificate)
-	}
-
-	if clientCertificateKey, userDefined := env["K6_PROMETHEUS_RW_CLIENT_CERTIFICATE_KEY"]; userDefined {
-		c.ClientCertificateKey = null.StringFrom(clientCertificateKey)
 	}
 
 	return c, nil
