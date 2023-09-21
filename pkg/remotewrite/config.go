@@ -41,6 +41,12 @@ type Config struct {
 	// Password is the Password for the Basic Auth.
 	Password null.String `json:"password"`
 
+	// ClientCertificate for if you want to use them (also requires clientCertificateKey to be set)
+	ClientCertificate null.String `json:"clientCertificate"`
+
+	// ClientCertificateKey for client certificate (also requires clientCertificate to be set)
+	ClientCertificateKey null.String `json:"clientCertificateKey"`
+
 	// PushInterval defines the time between flushes. The Output will wait the set time
 	// before push a new set of time series to the endpoint.
 	PushInterval types.NullDuration `json:"pushInterval"`
@@ -55,12 +61,6 @@ type Config struct {
 	TrendStats []string `json:"trendStats"`
 
 	StaleMarkers null.Bool `json:"staleMarkers"`
-
-	// clientCertificate for if you want to use them (also requires clientCertificateKey to be set)
-	ClientCertificate null.String `json:"clientCertificate"`
-
-	// key for client certificate (also requires clientCertificate to be set)
-	ClientCertificateKey null.String `json:"clientCertificateKey"`
 }
 
 // NewConfig creates an Output's configuration.
@@ -95,11 +95,6 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 
 	hc.TLSConfig = &tls.Config{
 		InsecureSkipVerify: conf.InsecureSkipTLSVerify.Bool, //nolint:gosec
-	}
-
-	if conf.ClientCertificate.Valid && conf.ClientCertificateKey.Valid {
-		cert, _ := tls.LoadX509KeyPair(conf.ClientCertificate.String, conf.ClientCertificateKey.String)
-		hc.TLSConfig.Certificates = []tls.Certificate{cert}
 	}
 
 	if conf.ClientCertificate.Valid && conf.ClientCertificateKey.Valid {
@@ -155,14 +150,6 @@ func (conf Config) Apply(applied Config) Config {
 	if len(applied.TrendStats) > 0 {
 		conf.TrendStats = make([]string, len(applied.TrendStats))
 		copy(conf.TrendStats, applied.TrendStats)
-	}
-
-	if applied.ClientCertificate.Valid {
-		conf.ClientCertificate = applied.ClientCertificate
-	}
-
-	if applied.ClientCertificateKey.Valid {
-		conf.ClientCertificateKey = applied.ClientCertificateKey
 	}
 
 	if applied.ClientCertificate.Valid {
