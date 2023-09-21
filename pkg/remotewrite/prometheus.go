@@ -3,8 +3,8 @@ package remotewrite
 import (
 	"sort"
 
+	prompb "buf.build/gen/go/prometheus/prometheus/protocolbuffers/go"
 	"github.com/mstoykov/atlas"
-	prompb "go.buf.build/grpc/go/prometheus/prometheus"
 	"go.k6.io/k6/metrics"
 )
 
@@ -21,8 +21,11 @@ func MapTagSet(t *metrics.TagSet) []*prompb.Label {
 	labels := make([]*prompb.Label, 0, n.Len())
 	for !n.IsRoot() {
 		prev, key, value := n.Data()
-		labels = append(labels, &prompb.Label{Name: key, Value: value})
 		n = prev
+		if key == "" || value == "" {
+			continue
+		}
+		labels = append(labels, &prompb.Label{Name: key, Value: value})
 	}
 	return labels
 }

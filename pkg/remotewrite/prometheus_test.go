@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
+	prompb "buf.build/gen/go/prometheus/prometheus/protocolbuffers/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	prompb "go.buf.build/grpc/go/prometheus/prometheus"
 	"go.k6.io/k6/metrics"
 )
 
@@ -17,12 +17,19 @@ func TestMapSeries(t *testing.T) {
 	t.Parallel()
 
 	r := metrics.NewRegistry()
+	tags := r.RootTagSet().
+		With("tagk1", "tagv1").With("b1", "v1").
+		// labels with empty key or value are not allowed
+		// so they will be not added as labels
+		With("tagEmptyValue", "").
+		With("", "tagEmptyKey")
+
 	series := metrics.TimeSeries{
 		Metric: &metrics.Metric{
 			Name: "test",
 			Type: metrics.Counter,
 		},
-		Tags: r.RootTagSet().With("tagk1", "tagv1").With("b1", "v1"),
+		Tags: tags,
 	}
 
 	lbls := MapSeries(series, "")

@@ -5,9 +5,9 @@ import (
 	"sort"
 	"time"
 
+	prompb "buf.build/gen/go/prometheus/prometheus/protocolbuffers/go"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
-	prompb "go.buf.build/grpc/go/prometheus/prometheus"
 	"go.k6.io/k6/metrics"
 )
 
@@ -25,7 +25,7 @@ func newExtendedTrendSink(tsr TrendStatsResolver) (*extendedTrendSink, error) {
 		return nil, fmt.Errorf("trend stats resolver is empty")
 	}
 	return &extendedTrendSink{
-		TrendSink:  &metrics.TrendSink{},
+		TrendSink:  metrics.NewTrendSink(),
 		trendStats: tsr,
 	}, nil
 }
@@ -155,18 +155,28 @@ func (sink *nativeHistogramSink) Add(s metrics.Sample) {
 // One method interfaces could be even better, to be checked.
 
 // P implements metrics.Sink.
-func (*nativeHistogramSink) P(pct float64) float64 {
+func (*nativeHistogramSink) P(_ float64) float64 {
 	panic("Native Histogram Sink has no support of percentile (P)")
 }
 
 // Format implements metrics.Sink.
-func (*nativeHistogramSink) Format(td time.Duration) map[string]float64 {
+func (*nativeHistogramSink) Format(_ time.Duration) map[string]float64 {
 	panic("Native Histogram Sink has no support of formatting (Format)")
 }
 
 // IsEmpty implements metrics.Sink.
 func (*nativeHistogramSink) IsEmpty() bool {
 	panic("Native Histogram Sink has no support of emptiness check (IsEmpty)")
+}
+
+// Drain implements metrics.Sink.
+func (*nativeHistogramSink) Drain() ([]byte, error) {
+	panic("Native Histogram Sink has no support of draining")
+}
+
+// Merge implements metrics.Sink.
+func (*nativeHistogramSink) Merge(_ []byte) error {
+	panic("Native Histogram Sink has no support of merging")
 }
 
 // MapPrompb maps the Trend type to the experimental Native Histogram.
