@@ -381,6 +381,7 @@ func TestOptionClientCertificate(t *testing.T) {
 	for name, tc := range cases {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			c, err := GetConsolidatedConfig(
 				tc.jsonRaw, tc.env, tc.arg)
 			require.NoError(t, err)
