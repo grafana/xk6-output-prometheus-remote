@@ -407,6 +407,8 @@ func TestOptionTrendAsNativeHistogram(t *testing.T) {
 	expconfig := Config{
 		ServerURL:              null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify:  null.BoolFrom(false),
+		Username:               null.NewString("", false),
+		Password:               null.NewString("", false),
 		PushInterval:           types.NullDurationFrom(5 * time.Second),
 		Headers:                make(map[string]string),
 		TrendAsNativeHistogram: null.BoolFrom(true),
