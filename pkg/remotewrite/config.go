@@ -42,9 +42,13 @@ type Config struct {
 	Password null.String `json:"password"`
 
 	// ClientCertificate is the public key of the SSL certificate.
+	// It is expected the path of the certificate on the file system.
+	// If it is required a dedicated Certifacate Authority then it should be added
+	// to the conventional folders defined by the operating system's registry.
 	ClientCertificate null.String `json:"clientCertificate"`
 
 	// ClientCertificateKey is the private key of the SSL certificate.
+	// It is expected the path of the certificate on the file system.
 	ClientCertificateKey null.String `json:"clientCertificateKey"`
 
 	// PushInterval defines the time between flushes. The Output will wait the set time
@@ -96,7 +100,10 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 	}
 
 	if conf.ClientCertificate.Valid && conf.ClientCertificateKey.Valid {
-		cert, _ := tls.LoadX509KeyPair(conf.ClientCertificate.String, conf.ClientCertificateKey.String)
+		cert, err := tls.LoadX509KeyPair(conf.ClientCertificate.String, conf.ClientCertificateKey.String)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load the TLS certificate: %w", err)
+		}
 		hc.TLSConfig.Certificates = []tls.Certificate{cert}
 	}
 
