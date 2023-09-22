@@ -237,6 +237,19 @@ func parseEnvs(env map[string]string) (Config, error) {
 		c.Headers[k] = v
 	}
 
+	if headers, headersDefined := env["K6_PROMETHEUS_RW_HTTP_HEADERS"]; headersDefined {
+		if c.Headers == nil {
+			c.Headers = make(map[string]string)
+		}
+		for _, kvPair := range strings.Split(headers, ",") {
+			header := strings.Split(kvPair, ":")
+			if len(header) != 2 {
+				continue
+			}
+			c.Headers[header[0]] = header[1]
+		}
+	}
+
 	if b, err := getEnvBool(env, "K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM"); err != nil {
 		return c, err
 	} else if b.Valid {
