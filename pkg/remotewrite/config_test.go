@@ -82,6 +82,19 @@ func TestConfigRemoteConfig(t *testing.T) {
 	assert.Equal(t, exprcc, rcc)
 }
 
+func TestConfigRemoteConfigClientCertificateError(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		ClientCertificate:    null.StringFrom("bad-cert-value"),
+		ClientCertificateKey: null.StringFrom("bad-cert-key"),
+	}
+
+	rcc, err := config.RemoteConfig()
+	assert.ErrorContains(t, err, "TLS certificate")
+	assert.Nil(t, rcc)
+}
+
 func TestGetConsolidatedConfig(t *testing.T) {
 	t.Parallel()
 
