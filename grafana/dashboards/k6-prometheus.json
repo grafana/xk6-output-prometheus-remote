@@ -456,7 +456,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(irate(k6_http_reqs_total{testid=~\"$testid\"}[$__rate_interval]))",
+              "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\"}[$__rate_interval]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
