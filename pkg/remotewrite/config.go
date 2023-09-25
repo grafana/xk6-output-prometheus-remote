@@ -51,6 +51,9 @@ type Config struct {
 	// It is expected the path of the certificate on the file system.
 	ClientCertificateKey null.String `json:"clientCertificateKey"`
 
+	// BearerToken if set is the token used for the `Authorization` header.
+	BearerToken null.String `json:"bearerToken"`
+
 	// PushInterval defines the time between flushes. The Output will wait the set time
 	// before push a new set of time series to the endpoint.
 	PushInterval types.NullDuration `json:"pushInterval"`
@@ -113,6 +116,14 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 			hc.Headers.Add(k, v)
 		}
 	}
+
+	if conf.BearerToken.String != "" {
+		if hc.Headers == nil {
+			hc.Headers = make(http.Header)
+		}
+		hc.Headers.Set("Authorization", "Bearer "+conf.BearerToken.String)
+	}
+
 	return &hc, nil
 }
 
@@ -206,7 +217,9 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, _
 }
 
 func parseEnvs(env map[string]string) (Config, error) {
-	var c Config
+	c := Config{
+		Headers: make(map[string]string),
+	}
 
 	getEnvBool := func(env map[string]string, name string) (null.Bool, error) {
 		if v, vDefined := env[name]; vDefined {
@@ -265,10 +278,17 @@ func parseEnvs(env map[string]string) (Config, error) {
 
 	envHeaders := getEnvMap(env, "K6_PROMETHEUS_RW_HEADERS_")
 	for k, v := range envHeaders {
-		if c.Headers == nil {
-			c.Headers = make(map[string]string)
-		}
 		c.Headers[k] = v
+	}
+
+	if headers, headersDefined := env["K6_PROMETHEUS_RW_HTTP_HEADERS"]; headersDefined {
+		for _, kvPair := range strings.Split(headers, ",") {
+			header := strings.Split(kvPair, ":")
+			if len(header) != 2 {
+				return c, fmt.Errorf("the provided header (%s) does not respect the expected format <header key>:<value>", kvPair)
+			}
+			c.Headers[header[0]] = header[1]
+		}
 	}
 
 	if b, err := getEnvBool(env, "K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM"); err != nil {
