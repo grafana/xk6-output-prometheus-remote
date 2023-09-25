@@ -19,7 +19,20 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Grafana k6 OSS Docs: Prometheus Remote Write",
+      "tooltip": "Open docs in a new tab",
+      "type": "link",
+      "url": "https://k6.io/docs/results-output/real-time/prometheus-remote-write/"
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
@@ -2033,7 +2046,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "metrics(k6_http_req_duration_)",
-        "description": "Statistic for Trend Metrics Queries. The available options depend on the values of the K6_PROMETHEUS_RW_TREND_STATS setting.",
+        "description": "Statistic for Trend Metrics Queries. The available options depend on the values of the K6_PROMETHEUS_RW_TREND_STATS setting. If empty, refresh the browser to query the DS and update the available options.",
         "hide": 0,
         "includeAll": false,
         "label": "Trend Metrics Query",
@@ -2084,7 +2097,7 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "description": "Adhoc filters are applied to all panels",
+        "description": "Adhoc filters are applied to all panels. To enable it, go to Dashboard Settings / Variables / adhoc_filter and select the target Prometheus data source.",
         "filters": [],
         "hide": 0,
         "label": "AdhocFilter",
