@@ -1999,7 +1999,7 @@
         "current": {
           "selected": false,
           "text": "prometheus",
-          "value": "P1809F7CD0C75ACF3"
+          "value": "${DS_PROMETHEUS}"
         },
         "description": "Choose a Prometheus Data Source",
         "hide": 0,
