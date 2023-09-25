@@ -2031,7 +2031,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(testid)",
-        "description": "Filter by \"testid\" tag (k6 run --tag testid=xyz)",
+        "description": "Filter by \"testid\" tag. Define it by tagging: k6 run --tag testid=xyz",
         "hide": 0,
         "includeAll": true,
         "label": "Test ID",
