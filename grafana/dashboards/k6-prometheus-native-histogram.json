@@ -768,302 +768,6 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
-      },
-      "id": 11,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Success Rate"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": false
-                  },
-                  {
-                    "id": "unit",
-                    "value": "%"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value (mean)"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "check"
-                },
-                "properties": [
-                  {
-                    "id": "filterable",
-                    "value": false
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 13
-          },
-          "id": 12,
-          "options": {
-            "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": true,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "frameIndex": 2,
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": true,
-                "displayName": "Value (count)"
-              }
-            ]
-          },
-          "pluginVersion": "10.1.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "round(k6_checks_rate{testid=~\"$testid\"}, 0.1)",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "round(k6_checks_rate{testid=~\"$testid\"}, 0.1)",
-              "hide": true,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "B"
-            }
-          ],
-          "title": "Checks list",
-          "transformations": [
-            {
-              "id": "labelsToFields",
-              "options": {
-                "keepLabels": [
-                  "__name__",
-                  "check"
-                ],
-                "mode": "columns"
-              }
-            },
-            {
-              "id": "groupBy",
-              "options": {
-                "fields": {
-                  "Value": {
-                    "aggregations": [
-                      "mean"
-                    ],
-                    "operation": "aggregate"
-                  },
-                  "check": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "k6_checks_rate": {
-                    "aggregations": [
-                      "sum",
-                      "count"
-                    ],
-                    "operation": "aggregate"
-                  }
-                }
-              }
-            },
-            {
-              "id": "calculateField",
-              "options": {
-                "alias": "Success Rate",
-                "binary": {
-                  "left": "Value (mean)",
-                  "operator": "*",
-                  "reducer": "sum",
-                  "right": "100"
-                },
-                "mode": "binary",
-                "reduce": {
-                  "reducer": "sum"
-                }
-              }
-            },
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [],
-                "fields": {}
-              }
-            }
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Filter by check name to query a particular check",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "axisSoftMax": 100,
-                "axisSoftMin": 0,
-                "barAlignment": -1,
-                "drawStyle": "line",
-                "fillOpacity": 19,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "%"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 13
-          },
-          "id": 13,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "avg(round(k6_checks_rate{testid=~\"$testid\"}, 0.1)*100)",
-              "instant": false,
-              "legendFormat": "k6_checks_rate",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Checks Success Rate (aggregate individual checks)",
-          "type": "timeseries"
-        }
-      ],
-      "title": "Checks",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
         "y": 12
       },
       "id": 16,
@@ -1884,6 +1588,302 @@
         "h": 1,
         "w": 24,
         "x": 0,
+        "y": 13
+      },
+      "id": 11,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Success Rate"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": false
+                  },
+                  {
+                    "id": "unit",
+                    "value": "%"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value (mean)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "check"
+                },
+                "properties": [
+                  {
+                    "id": "filterable",
+                    "value": false
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 13
+          },
+          "id": 12,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "enablePagination": true,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 2,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Value (count)"
+              }
+            ]
+          },
+          "pluginVersion": "10.1.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(k6_checks_rate{testid=~\"$testid\"}, 0.1)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "round(k6_checks_rate{testid=~\"$testid\"}, 0.1)",
+              "hide": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Checks list",
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "keepLabels": [
+                  "__name__",
+                  "check"
+                ],
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "Value": {
+                    "aggregations": [
+                      "mean"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "check": {
+                    "aggregations": [],
+                    "operation": "groupby"
+                  },
+                  "k6_checks_rate": {
+                    "aggregations": [
+                      "sum",
+                      "count"
+                    ],
+                    "operation": "aggregate"
+                  }
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Success Rate",
+                "binary": {
+                  "left": "Value (mean)",
+                  "operator": "*",
+                  "reducer": "sum",
+                  "right": "100"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [],
+                "fields": {}
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Filter by check name to query a particular check",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMax": 100,
+                "axisSoftMin": 0,
+                "barAlignment": -1,
+                "drawStyle": "line",
+                "fillOpacity": 19,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "%"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 13
+          },
+          "id": 13,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "avg(round(k6_checks_rate{testid=~\"$testid\"}, 0.1)*100)",
+              "instant": false,
+              "legendFormat": "k6_checks_rate",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Checks Success Rate (aggregate individual checks)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Checks",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
         "y": 14
       },
       "id": 7,
@@ -2060,7 +2060,7 @@
         "name": "quantile",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "0.95",
             "value": "0.95"
           }
@@ -2071,9 +2071,10 @@
       },
       {
         "current": {
+          "isNone": true,
           "selected": false,
-          "text": "k6_vus_max",
-          "value": "k6_vus_max"
+          "text": "None",
+          "value": ""
         },
         "datasource": {
           "type": "prometheus",
