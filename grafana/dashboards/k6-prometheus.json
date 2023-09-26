@@ -2028,7 +2028,7 @@
           "query": "label_values(testid)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2046,7 +2046,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "metrics(k6_http_req_duration_)",
-        "description": "Statistic for Trend Metrics Queries. The available options depend on the values of the K6_PROMETHEUS_RW_TREND_STATS setting. If empty, refresh the browser to query the DS and update the available options.",
+        "description": "Statistic for Trend Metrics Queries. The available options depend on the values of the K6_PROMETHEUS_RW_TREND_STATS setting.",
         "hide": 0,
         "includeAll": false,
         "label": "Trend Metrics Query",
@@ -2057,7 +2057,7 @@
           "query": "metrics(k6_http_req_duration_)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "/k6_http_req_duration_(?<value>[^\"]+)/g",
         "skipUrlSync": false,
         "sort": 2,
