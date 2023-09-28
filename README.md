@@ -1,30 +1,29 @@
 # xk6-output-prometheus-remote
 
-[k6](https://github.com/grafana/k6) extension for publishing test-run metrics to Prometheus via Remote Write endpoint.
+This extension allows publishing test-run metrics to Prometheus via Remote Write endpoint.
 
-> :bookmark: As of k6 v0.42.0, this extension is available within k6 as an _experimental module_.
-> This means that the extension has entered the process of being fully merged into the core of k6 and does not require a special build with xk6 to utilize this feature.
->
-> See the [Prometheus remote write guide](https://k6.io/docs/results-output/real-time/prometheus-remote-write/) to utilize this feature.
->
+> :warning: Be careful not to confuse this with the [Prometheus Remote Write **client** extension](https://github.com/grafana/xk6-client-prometheus-remote) which is used for load and performance testing of _Prometheus_ itself.
 
-There are many options for remote-write compatible agents, the official list can be found [here](https://prometheus.io/docs/operating/integrations/). The exact details of how metrics will be processed or stored depends on the underlying agent used.
+As of k6 v0.42.0, this extension is available within [k6](https://github.com/grafana/k6) as an _experimental module_. This means that the extension is in the process of being fully merged into the core of k6 and doesn't require a special build with [xk6](https://github.com/grafana/xk6) to use this feature.
 
-> :warning: Not to be confused with [Prometheus Remote Write **client** extension](https://github.com/grafana/xk6-client-prometheus-remote) which is for load testing _Prometheus_ itself.
 
 ### Usage
 
-To build k6 binary with the Prometheus remote write output extension use:
-```
-xk6 build --with github.com/grafana/xk6-output-prometheus-remote@latest 
+Refer to the [Prometheus remote write guide in the k6 docs](https://k6.io/docs/results-output/real-time/prometheus-remote-write/) to explore the various methods and options for sending k6 metrics to a Prometheus remote-write endpoint. 
+
+### Development
+
+For developing or testing this extension, you can build a k6 binary with the local extension using [xk6](https://github.com/grafana/xk6) with the following steps:
+
+```bash
+cd xk6-output-prometheus-remote 
+
+xk6 build --with github.com/grafana/xk6-output-prometheus-remote=. 
 ```
 
-Then run new k6 binary with the following command for using the default configuration (e.g. remote write server url set to `http://localhost:9090/api/v1/write`):
-```
-./k6 run -o xk6-prometheus-rw script.js 
-```
-
-Check [the documentation](https://k6.io/docs/results-output/real-time/prometheus-remote-write) for advanced configurations, Docker Compose ready to use example or for using the builtin experimental output.
+For more details, refer to the k6 docs:
+- [Build a k6 binary using Go](https://k6.io/docs/extensions/guides/build-a-k6-binary-using-go/)
+- [k6 output extensions](https://k6.io/docs/extensions/get-started/create/output-extensions/)
 
 ## Dashboards
 
