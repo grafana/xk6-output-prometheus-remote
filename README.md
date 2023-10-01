@@ -4,7 +4,7 @@ The `xk6-output-prometheus-remote` extension allows you to publish test-run metr
 
 > :warning: Be careful not to confuse this with the [Prometheus Remote Write **client** extension](https://github.com/grafana/xk6-client-prometheus-remote) which is used for load and performance testing of _Prometheus_ itself.
 
-As of k6 v0.42.0, this extension is available within [k6](https://github.com/grafana/k6) as an _experimental module_. This means that the extension is in the process of being fully merged into the core of k6 and doesn't require a special build with [xk6](https://github.com/grafana/xk6) to use this feature.
+As of k6 v0.42.0, this extension is available within [k6](https://github.com/grafana/k6) as an _experimental module_. This means that the extension is in the process of being fully merged into the core of k6 and doesn't require a special build with [xk6](https://github.com/grafana/xk6) to use this feature. For more information, refer to the [extension graduation process](https://k6.io/docs/extensions/explanations/extension-graduation/).
 
 
 ### Usage
