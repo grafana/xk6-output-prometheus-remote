@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/grafana/xk6-output-prometheus-remote/pkg/remote"
+	"github.com/prometheus/common/config"
+	"github.com/prometheus/common/sigv4"
 	"go.k6.io/k6/lib/types"
 	"gopkg.in/guregu/null.v3"
 )
@@ -40,6 +42,24 @@ type Config struct {
 
 	// Password is the Password for the Basic Auth.
 	Password null.String `json:"password"`
+
+	// SigV4Auth enables SigV4 for AWS Managed Prometheus.
+	SigV4Auth null.Bool `json:"sigV4Auth"`
+
+	// SigV4Region is the AWS region where the workspace is.
+	SigV4Region null.String `json:"sigV4Region"`
+
+	// SigV4AccessKey is the AWS access key.
+	SigV4AccessKey null.String `json:"sigV4AccessKey"`
+
+	// SigV4SecretKey is the AWS secret key.
+	SigV4SecretKey null.String `json:"sigV4SecretKey"`
+
+	// SigV4Profile is the AWS profile to use.
+	SigV4Profile null.String `json:"sigV4Profile"`
+
+	// SigV4RoleARN is the AWS role ARN to assume.
+	SigV4RoleARN null.String `json:"sigV4RoleARN"`
 
 	// ClientCertificate is the public key of the SSL certificate.
 	// It is expected the path of the certificate on the file system.
@@ -77,6 +97,12 @@ func NewConfig() Config {
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		Username:              null.NewString("", false),
 		Password:              null.NewString("", false),
+		SigV4Auth:             null.BoolFrom(false),
+		SigV4Region:           null.NewString("", false),
+		SigV4AccessKey:        null.NewString("", false),
+		SigV4SecretKey:        null.NewString("", false),
+		SigV4Profile:          null.NewString("", false),
+		SigV4RoleARN:          null.NewString("", false),
 		PushInterval:          types.NullDurationFrom(defaultPushInterval),
 		Headers:               make(map[string]string),
 		TrendStats:            defaultTrendStats,
@@ -124,6 +150,16 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 		hc.Headers.Set("Authorization", "Bearer "+conf.BearerToken.String)
 	}
 
+	if conf.SigV4Auth.Bool {
+		hc.SigV4Config = &sigv4.SigV4Config{
+			Region:    conf.SigV4Region.String,
+			AccessKey: conf.SigV4AccessKey.String,
+			SecretKey: config.Secret(conf.SigV4SecretKey.String),
+			Profile:   conf.SigV4Profile.String,
+			RoleARN:   conf.SigV4RoleARN.String,
+		}
+	}
+
 	return &hc, nil
 }
 
@@ -147,6 +183,30 @@ func (conf Config) Apply(applied Config) Config {
 
 	if applied.BearerToken.Valid {
 		conf.BearerToken = applied.BearerToken
+	}
+
+	if applied.SigV4Auth.Valid {
+		conf.SigV4Auth = applied.SigV4Auth
+	}
+
+	if applied.SigV4Region.Valid {
+		conf.SigV4Region = applied.SigV4Region
+	}
+
+	if applied.SigV4AccessKey.Valid {
+		conf.SigV4AccessKey = applied.SigV4AccessKey
+	}
+
+	if applied.SigV4SecretKey.Valid {
+		conf.SigV4SecretKey = applied.SigV4SecretKey
+	}
+
+	if applied.SigV4Profile.Valid {
+		conf.SigV4Profile = applied.SigV4Profile
+	}
+
+	if applied.SigV4RoleARN.Valid {
+		conf.SigV4RoleARN = applied.SigV4RoleARN
 	}
 
 	if applied.PushInterval.Valid {
@@ -202,6 +262,14 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, _
 			return result, fmt.Errorf("parse environment variables options failed: %w", err)
 		}
 		result = result.Apply(envConf)
+	}
+
+	if len(env) > 0 {
+		sigV4Conf, err := parseSigV4(env)
+		if err != nil {
+			return result, fmt.Errorf("parse sigv4 options failed: %w", err)
+		}
+		result = result.Apply(sigV4Conf)
 	}
 
 	// TODO: define a way for defining Output's options
@@ -380,6 +448,38 @@ func parseArg(text string) (Config, error) {
 			}
 			c.Headers[strings.TrimPrefix(key, "headers.")] = v
 		}
+	}
+
+	return c, nil
+}
+
+func parseSigV4(env map[string]string) (Config, error) {
+	var c Config
+
+	if b, err := envBool(env, "K6_PROMETHEUS_RW_SIGV4_AUTH"); err != nil {
+		return c, err
+	} else if b.Valid {
+		c.SigV4Auth = b
+	}
+
+	if sigv4Region, sigv4RegionDefined := env["K6_PROMETHEUS_RW_SIGV4_REGION"]; sigv4RegionDefined {
+		c.SigV4Region = null.StringFrom(sigv4Region)
+	}
+
+	if sigv4AccessKey, sigv4AccessKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_ACCESS_KEY"]; sigv4AccessKeyDefined {
+		c.SigV4AccessKey = null.StringFrom(sigv4AccessKey)
+	}
+
+	if sigv4SecretKey, sigv4SecretKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_SECRET_KEY"]; sigv4SecretKeyDefined {
+		c.SigV4SecretKey = null.StringFrom(sigv4SecretKey)
+	}
+
+	if sigv4Profile, sigv4ProfileDefined := env["K6_PROMETHEUS_RW_SIGV4_PROFILE"]; sigv4ProfileDefined {
+		c.SigV4Profile = null.StringFrom(sigv4Profile)
+	}
+
+	if sigv4RoleARN, sigv4RoleARNDefined := env["K6_PROMETHEUS_RW_SIGV4_ROLE_ARN"]; sigv4RoleARNDefined {
+		c.SigV4RoleARN = null.StringFrom(sigv4RoleARN)
 	}
 
 	return c, nil
