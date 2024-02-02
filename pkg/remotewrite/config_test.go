@@ -24,6 +24,7 @@ func TestConfigApply(t *testing.T) {
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		Username:              null.StringFrom("user"),
 		Password:              null.StringFrom("pass"),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(10 * time.Second),
 		Headers: map[string]string{
 			"X-Header": "value",
@@ -65,6 +66,7 @@ func TestConfigRemoteConfig(t *testing.T) {
 			"Authorization": "pre-set-token",
 		},
 		BearerToken: null.StringFrom("my-fake-token"),
+		SigV4Auth:   null.BoolFrom(false),
 	}
 
 	headers := http.Header{}
@@ -121,6 +123,7 @@ func TestGetConsolidatedConfig(t *testing.T) {
 				InsecureSkipTLSVerify: null.BoolFrom(false),
 				Username:              null.NewString("", false),
 				Password:              null.NewString("", false),
+				SigV4Auth:             null.BoolFrom(false),
 				PushInterval:          types.NullDurationFrom(5 * time.Second),
 				Headers:               make(map[string]string),
 				TrendStats:            []string{"p(99)"},
@@ -134,6 +137,7 @@ func TestGetConsolidatedConfig(t *testing.T) {
 				InsecureSkipTLSVerify: null.BoolFrom(false),
 				Username:              null.NewString("", false),
 				Password:              null.NewString("", false),
+				SigV4Auth:             null.BoolFrom(false),
 				PushInterval:          types.NullDurationFrom(defaultPushInterval),
 				Headers:               make(map[string]string),
 				TrendStats:            []string{"p(99)"},
@@ -152,6 +156,7 @@ func TestGetConsolidatedConfig(t *testing.T) {
 				InsecureSkipTLSVerify: null.BoolFrom(false),
 				Username:              null.NewString("u", true),
 				Password:              null.NewString("", false),
+				SigV4Auth:             null.BoolFrom(false),
 				PushInterval:          types.NullDurationFrom(defaultPushInterval),
 				Headers:               make(map[string]string),
 				TrendStats:            []string{"p(99)"},
@@ -170,6 +175,7 @@ func TestGetConsolidatedConfig(t *testing.T) {
 				InsecureSkipTLSVerify: null.BoolFrom(false),
 				Username:              null.StringFrom("env"),
 				Password:              null.StringFrom("env"),
+				SigV4Auth:             null.BoolFrom(false),
 				PushInterval:          types.NullDurationFrom(defaultPushInterval),
 				Headers:               make(map[string]string),
 				TrendStats:            []string{"p(99)"},
@@ -247,6 +253,7 @@ func TestOptionServerURL(t *testing.T) {
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		Username:              null.NewString("", false),
 		Password:              null.NewString("", false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -288,6 +295,7 @@ func TestOptionHeaders(t *testing.T) {
 	expconfig := Config{
 		ServerURL:             null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers: map[string]string{
 			"X-MY-HEADER1":   "hval1",
@@ -328,6 +336,7 @@ func TestOptionInsecureSkipTLSVerify(t *testing.T) {
 	expconfig := Config{
 		ServerURL:             null.StringFrom(defaultServerURL),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(defaultPushInterval),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -364,6 +373,7 @@ func TestOptionBasicAuth(t *testing.T) {
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		Username:              null.StringFrom("user1"),
 		Password:              null.StringFrom("pass1"),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -398,6 +408,7 @@ func TestOptionBearerToken(t *testing.T) {
 		ServerURL:             null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		BearerToken:           null.StringFrom("my-bearer-token"),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -431,6 +442,7 @@ func TestOptionClientCertificate(t *testing.T) {
 	expconfig := Config{
 		ServerURL:             null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -470,6 +482,7 @@ func TestOptionTrendAsNativeHistogram(t *testing.T) {
 		InsecureSkipTLSVerify:  null.BoolFrom(false),
 		Username:               null.NewString("", false),
 		Password:               null.NewString("", false),
+		SigV4Auth:              null.BoolFrom(false),
 		PushInterval:           types.NullDurationFrom(5 * time.Second),
 		Headers:                make(map[string]string),
 		TrendAsNativeHistogram: null.BoolFrom(true),
@@ -506,6 +519,7 @@ func TestOptionPushInterval(t *testing.T) {
 		InsecureSkipTLSVerify: null.BoolFrom(false),
 		Username:              null.NewString("", false),
 		Password:              null.NewString("", false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom((1 * time.Minute) + (2 * time.Second)),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
@@ -542,6 +556,7 @@ func TestConfigTrendStats(t *testing.T) {
 	expconfig := Config{
 		ServerURL:             null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"max", "p(95)"},
@@ -575,6 +590,7 @@ func TestOptionStaleMarker(t *testing.T) {
 	expconfig := Config{
 		ServerURL:             null.StringFrom("http://localhost:9090/api/v1/write"),
 		InsecureSkipTLSVerify: null.BoolFrom(false),
+		SigV4Auth:             null.BoolFrom(false),
 		PushInterval:          types.NullDurationFrom(5 * time.Second),
 		Headers:               make(map[string]string),
 		TrendStats:            []string{"p(99)"},
