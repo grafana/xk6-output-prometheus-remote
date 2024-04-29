@@ -18,7 +18,9 @@
   "description": "Visualize k6 OSS results stored in Prometheus",
   "editable": true,
   "fiscalYearStartMonth": 0,
+  "gnetId": 19665,
   "graphTooltip": 0,
+  "id": 27185,
   "links": [
     {
       "asDropdown": false,
@@ -38,7 +40,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -46,6 +48,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -220,7 +223,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_vus{testid=~\"$testid\"})",
@@ -232,7 +235,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\"})",
@@ -245,7 +248,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\"}[$__rate_interval]))",
@@ -258,7 +261,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(round(k6_http_req_failed_rate{testid=~\"$testid\"}, 0.1)*100)",
@@ -271,7 +274,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\", expected_response=\"false\"}[$__rate_interval]))",
@@ -301,7 +304,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -339,14 +342,16 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.1.2",
+      "pluginVersion": "10.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(k6_http_reqs_total{testid=~\"$testid\"})",
@@ -362,7 +367,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -401,14 +406,16 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.1.2",
+      "pluginVersion": "10.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(k6_http_reqs_total{testid=~\"$testid\", expected_response=\"false\"})",
@@ -424,7 +431,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -462,14 +469,16 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.1.2",
+      "pluginVersion": "10.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\"}[$__rate_interval]))",
@@ -485,7 +494,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "Select a different Stat to change the query",
       "fieldConfig": {
@@ -524,14 +533,16 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.1.2",
+      "pluginVersion": "10.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\"})",
@@ -547,7 +558,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -555,6 +566,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -622,7 +634,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(irate(k6_data_sent_total{testid=~\"$testid\"}[$__rate_interval]))",
@@ -634,7 +646,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -652,7 +664,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -660,6 +672,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -740,7 +753,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_iteration_duration_$quantile_stat{testid=~\"$testid\"})",
@@ -752,7 +765,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -783,7 +796,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "Select a different Stat to change the query\n\n<a href=\"https://k6.io/docs/using-k6/metrics/reference/#http\" target=\"_blank\">HTTP-specific built-in metrics</a>",
       "fieldConfig": {
@@ -792,6 +805,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -827,7 +841,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -874,7 +889,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_blocked_$quantile_stat{testid=~\"$testid\"})",
@@ -887,7 +902,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_tls_handshaking_$quantile_stat{testid=~\"$testid\"})",
@@ -900,7 +915,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_sending_$quantile_stat{testid=~\"$testid\"})",
@@ -913,7 +928,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_waiting_$quantile_stat{testid=~\"$testid\"})",
@@ -926,7 +941,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_receiving_$quantile_stat{testid=~\"$testid\"})",
@@ -939,7 +954,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\"})",
@@ -956,7 +971,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "Select a different Stat to change the query",
       "fieldConfig": {
@@ -965,6 +980,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1001,7 +1017,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1093,7 +1110,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\"})",
@@ -1106,7 +1123,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\", expected_response=\"true\"})",
@@ -1118,7 +1135,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(k6_http_req_duration_$quantile_stat{testid=~\"$testid\", expected_response=\"false\"})",
@@ -1135,7 +1152,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "",
       "fieldConfig": {
@@ -1144,6 +1161,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1180,7 +1198,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1287,7 +1306,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\"}[$__rate_interval]))",
@@ -1299,7 +1318,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\", expected_response=\"false\"}[$__rate_interval]))",
@@ -1312,7 +1331,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "sum(irate(k6_http_reqs_total{testid=~\"$testid\", expected_response=\"true\"}[$__rate_interval]))",
@@ -1329,7 +1348,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "min/max/p95/p99 depends on the available Quantile Stats",
       "fieldConfig": {
@@ -1349,7 +1368,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           }
@@ -1462,12 +1482,12 @@
         "frameIndex": 2,
         "showHeader": true
       },
-      "pluginVersion": "10.1.2",
+      "pluginVersion": "10.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg by(name, method, status) (k6_http_req_duration_min{testid=~\"$testid\"})",
@@ -1481,7 +1501,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg by(name, method, status) (k6_http_req_duration_max{testid=~\"$testid\"})",
@@ -1495,7 +1515,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg by(name, method, status) (k6_http_req_duration_p95{testid=~\"$testid\"})",
@@ -1509,7 +1529,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg by(name, method, status) (k6_http_req_duration_p99{testid=~\"$testid\"})",
@@ -1617,7 +1637,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "fieldConfig": {
         "defaults": {
@@ -1716,7 +1736,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1793,7 +1813,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "description": "Filter by check name to query a particular check",
       "fieldConfig": {
@@ -1870,7 +1890,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "pZRohFJIk"
           },
           "editorMode": "code",
           "expr": "avg(round(k6_checks_rate{testid=~\"$testid\"}, 0.1)*100)",
@@ -1886,7 +1906,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "pZRohFJIk"
       },
       "gridPos": {
         "h": 5,
@@ -1909,8 +1929,7 @@
     }
   ],
   "refresh": "",
-  "schemaVersion": 38,
-  "style": "dark",
+  "schemaVersion": 39,
   "tags": [
     "prometheus",
     "k6"
@@ -1920,8 +1939,8 @@
       {
         "current": {
           "selected": false,
-          "text": "prometheus",
-          "value": "P1809F7CD0C75ACF3"
+          "text": "prometheus-k6",
+          "value": "pZRohFJIk"
         },
         "description": "Choose a Prometheus Data Source",
         "hide": 0,
@@ -1939,17 +1958,13 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "pZRohFJIk"
         },
         "definition": "label_values(testid)",
         "description": "Filter by \"testid\" tag. Define it by tagging: k6 run --tag testid=xyz",
@@ -1978,7 +1993,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "pZRohFJIk"
         },
         "definition": "metrics(k6_http_req_duration_)",
         "description": "Statistic for Trend Metrics Queries. The available options depend on the values of the K6_PROMETHEUS_RW_TREND_STATS setting.",
@@ -2001,7 +2016,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "pZRohFJIk"
         },
         "description": "Adhoc filters are applied to all panels. To enable it, go to Dashboard Settings / Variables / adhoc_filter and select the target Prometheus data source.",
         "filters": [],
