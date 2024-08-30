@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"net/http"
 	"strconv"
 	"strings"
@@ -68,6 +69,15 @@ type Config struct {
 	TrendStats []string `json:"trendStats"`
 
 	StaleMarkers null.Bool `json:"staleMarkers"`
+
+	// Sigv4Region is the AWS region where the workspace is.
+	Sigv4Region null.String `json:"sigV4Region"`
+
+	// Sigv4AccessKey is the AWS access key.
+	Sigv4AccessKey null.String `json:"sigV4AccessKey"`
+
+	// Sigv4SecretKey is the AWS secret key.
+	Sigv4SecretKey null.String `json:"sigV4SecretKey"`
 }
 
 // NewConfig creates an Output's configuration.
@@ -81,6 +91,9 @@ func NewConfig() Config {
 		Headers:               make(map[string]string),
 		TrendStats:            defaultTrendStats,
 		StaleMarkers:          null.BoolFrom(false),
+		Sigv4Region:           null.NewString("", false),
+		Sigv4AccessKey:        null.NewString("", false),
+		Sigv4SecretKey:        null.NewString("", false),
 	}
 }
 
@@ -108,6 +121,14 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 			return nil, fmt.Errorf("failed to load the TLS certificate: %w", err)
 		}
 		hc.TLSConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	if conf.Sigv4Region.Valid && conf.Sigv4AccessKey.Valid && conf.Sigv4SecretKey.Valid {
+		hc.SigV4 = &sigv4.Config{
+			Region:             conf.Sigv4Region.String,
+			AwsAccessKeyID:     conf.Sigv4AccessKey.String,
+			AwsSecretAccessKey: conf.Sigv4SecretKey.String,
+		}
 	}
 
 	if len(conf.Headers) > 0 {
@@ -147,6 +168,18 @@ func (conf Config) Apply(applied Config) Config {
 
 	if applied.BearerToken.Valid {
 		conf.BearerToken = applied.BearerToken
+	}
+
+	if applied.Sigv4Region.Valid {
+		conf.Sigv4Region = applied.Sigv4Region
+	}
+
+	if applied.Sigv4AccessKey.Valid {
+		conf.Sigv4AccessKey = applied.Sigv4AccessKey
+	}
+
+	if applied.Sigv4SecretKey.Valid {
+		conf.Sigv4SecretKey = applied.Sigv4SecretKey
 	}
 
 	if applied.PushInterval.Valid {
@@ -297,6 +330,18 @@ func parseEnvs(env map[string]string) (Config, error) {
 			}
 			c.Headers[header[0]] = header[1]
 		}
+	}
+
+	if sigv4Region, sigv4RegionDefined := env["K6_PROMETHEUS_RW_SIGV4_REGION"]; sigv4RegionDefined {
+		c.Sigv4Region = null.StringFrom(sigv4Region)
+	}
+
+	if sigv4AccessKey, sigv4AccessKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_ACCESS_KEY"]; sigv4AccessKeyDefined {
+		c.Sigv4AccessKey = null.StringFrom(sigv4AccessKey)
+	}
+
+	if sigv4SecretKey, sigv4SecretKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_SECRET_KEY"]; sigv4SecretKeyDefined {
+		c.Sigv4SecretKey = null.StringFrom(sigv4SecretKey)
 	}
 
 	if b, err := envBool(env, "K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM"); err != nil {
