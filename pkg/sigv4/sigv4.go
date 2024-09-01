@@ -31,29 +31,36 @@ type DefaultSigner struct {
 }
 
 func NewDefaultSigner(config *Config) Signer {
-	now := time.Now().UTC()
-	ds := DefaultSigner{
-		iSO8601Date: now.Format("20060102T150405Z"),
-		credentialScope: fmt.Sprintf(
-			"%s/%s/%s/aws4_request",
-			now.UTC().Format("20060102"),
-			config.Region,
-			awsServiceName,
-		),
+	return &DefaultSigner{
 		config: config,
 	}
-	return &ds
 }
 
 func (d *DefaultSigner) Sign(req *http.Request) error {
-	d.payloadHash = d.getPayloadHashHex(req)
+	now := time.Now().UTC()
+	d.iSO8601Date = now.Format("20060102T150405Z")
+	d.credentialScope = fmt.Sprintf(
+		"%s/%s/%s/aws4_request",
+		now.UTC().Format("20060102"),
+		d.config.Region,
+		awsServiceName,
+	)
+
+	payloadHash, err := d.getPayloadHash(req)
+	if err != nil {
+		return err
+	}
+
+	d.payloadHash = payloadHash
 	d.addRequiredHeaders(req)
-	d.canonicalHeaders, d.signedHeaders = d.getCanonicalHeaders(req)
+	d.canonicalHeaders, d.signedHeaders = d.getCanonicalAndSignedHeaders(req)
+
 	canonicalReq := d.createCanonicalRequest(req)
 	stringToSign, err := d.createStringToSign(canonicalReq)
 	if err != nil {
 		return err
 	}
+
 	signature := d.sign(d.createSigningKey(), stringToSign)
 	authorizationHeader := fmt.Sprintf(
 		"%s Credential=%s/%s, SignedHeaders=%s, Signature=%s",
@@ -65,11 +72,6 @@ func (d *DefaultSigner) Sign(req *http.Request) error {
 	)
 	req.Header.Set("Authorization", authorizationHeader)
 	return nil
-}
-
-func (d *DefaultSigner) getPayloadHashHex(req *http.Request) string {
-	payloadHash, _ := d.getPayloadHash(req)
-	return payloadHash
 }
 
 func (d *DefaultSigner) getPayloadHash(req *http.Request) (string, error) {
@@ -102,7 +104,7 @@ func (d *DefaultSigner) addRequiredHeaders(req *http.Request) {
 	req.Header.Set("x-amz-content-sha256", d.payloadHash)
 }
 
-func (d *DefaultSigner) getCanonicalHeaders(req *http.Request) (string, string) {
+func (d *DefaultSigner) getCanonicalAndSignedHeaders(req *http.Request) (string, string) {
 	var headers []string
 	var signedHeaders []string
 
