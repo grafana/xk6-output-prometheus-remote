@@ -63,7 +63,11 @@ func NewWriteClient(endpoint string, cfg *HTTPConfig) (*WriteClient, error) {
 		}
 	}
 	if cfg.SigV4 != nil {
-		wc.hc.Transport = sigv4.NewRoundTripper(cfg.SigV4, wc.hc.Transport)
+		tripper, err := sigv4.NewRoundTripper(cfg.SigV4, wc.hc.Transport)
+		if err != nil {
+			return nil, err
+		}
+		wc.hc.Transport = tripper
 	}
 	return wc, nil
 }

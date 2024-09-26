@@ -1,7 +1,6 @@
-package sigv4_test
+package sigv4
 
 import (
-	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -9,22 +8,29 @@ import (
 )
 
 func TestTripper_request_includes_required_headers(t *testing.T) {
+	t.Parallel()
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check if required headers are present
-		authorization := r.Header.Get("Authorization")
-		amzDate := r.Header.Get("x-amz-date")
-		contentSHA256 := r.Header.Get("x-amz-content-sha256")
+		authorization := r.Header.Get(authorizationHeaderKey)
+		amzDate := r.Header.Get(amzDateKey)
+		contentSHA256 := r.Header.Get(contentSHAKey)
 
 		// Respond to the request
 		w.WriteHeader(http.StatusOK)
 
-		assert.NotEmpty(t, authorization, "Authorization header should be present")
-		assert.NotEmpty(t, amzDate, "x-amz-date header should be present")
-		assert.NotEmpty(t, contentSHA256, "x-amz-content-sha256 header should be present")
+		assert.NotEmptyf(t, authorization, "%s header should be present", authorizationHeaderKey)
+		assert.NotEmptyf(t, amzDate, "%s header should be present", amzDateKey)
+		assert.NotEmpty(t, contentSHA256, "%s header should be present", contentSHAKey)
 	}))
 	defer server.Close()
+
 	client := http.Client{}
-	client.Transport = sigv4.NewRoundTripper(&sigv4.Config{}, http.DefaultTransport)
+	tripper, err := NewRoundTripper(&Config{}, http.DefaultTransport)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.Transport = tripper
 
 	req, err := http.NewRequest("POST", server.URL, nil)
 	if err != nil {

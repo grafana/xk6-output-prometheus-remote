@@ -1,6 +1,7 @@
 package sigv4
 
 import (
+	"errors"
 	"net/http"
 )
 
@@ -16,15 +17,21 @@ type Config struct {
 	AwsAccessKeyID     string
 }
 
-func NewRoundTripper(config *Config, next http.RoundTripper) *Tripper {
+func NewRoundTripper(config *Config, next http.RoundTripper) (*Tripper, error) {
+	if config == nil {
+		return nil, errors.New("can't initialize a sigv4 round tripper with nil config")
+	}
+
 	if next == nil {
 		next = http.DefaultTransport
 	}
-	return &Tripper{
+
+	tripper := &Tripper{
 		config: config,
 		next:   next,
 		signer: NewDefaultSigner(config),
 	}
+	return tripper, nil
 }
 
 func (c *Tripper) RoundTrip(req *http.Request) (*http.Response, error) {
