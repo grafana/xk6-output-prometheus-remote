@@ -70,14 +70,14 @@ type Config struct {
 
 	StaleMarkers null.Bool `json:"staleMarkers"`
 
-	// Sigv4Region is the AWS region where the workspace is.
-	Sigv4Region null.String `json:"sigV4Region"`
+	// SigV4Region is the AWS region where the workspace is.
+	SigV4Region null.String `json:"sigV4Region"`
 
-	// Sigv4AccessKey is the AWS access key.
-	Sigv4AccessKey null.String `json:"sigV4AccessKey"`
+	// SigV4AccessKey is the AWS access key.
+	SigV4AccessKey null.String `json:"sigV4AccessKey"`
 
-	// Sigv4SecretKey is the AWS secret key.
-	Sigv4SecretKey null.String `json:"sigV4SecretKey"`
+	// SigV4SecretKey is the AWS secret key.
+	SigV4SecretKey null.String `json:"sigV4SecretKey"`
 }
 
 // NewConfig creates an Output's configuration.
@@ -91,9 +91,9 @@ func NewConfig() Config {
 		Headers:               make(map[string]string),
 		TrendStats:            defaultTrendStats,
 		StaleMarkers:          null.BoolFrom(false),
-		Sigv4Region:           null.NewString("", false),
-		Sigv4AccessKey:        null.NewString("", false),
-		Sigv4SecretKey:        null.NewString("", false),
+		SigV4Region:           null.NewString("", false),
+		SigV4AccessKey:        null.NewString("", false),
+		SigV4SecretKey:        null.NewString("", false),
 	}
 }
 
@@ -123,11 +123,11 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 		hc.TLSConfig.Certificates = []tls.Certificate{cert}
 	}
 
-	if conf.Sigv4Region.Valid && conf.Sigv4AccessKey.Valid && conf.Sigv4SecretKey.Valid {
+	if conf.SigV4Region.Valid && conf.SigV4AccessKey.Valid && conf.SigV4SecretKey.Valid {
 		hc.SigV4 = &sigv4.Config{
-			Region:             conf.Sigv4Region.String,
-			AwsAccessKeyID:     conf.Sigv4AccessKey.String,
-			AwsSecretAccessKey: conf.Sigv4SecretKey.String,
+			Region:             conf.SigV4Region.String,
+			AwsAccessKeyID:     conf.SigV4AccessKey.String,
+			AwsSecretAccessKey: conf.SigV4SecretKey.String,
 		}
 	}
 
@@ -170,16 +170,16 @@ func (conf Config) Apply(applied Config) Config {
 		conf.BearerToken = applied.BearerToken
 	}
 
-	if applied.Sigv4Region.Valid {
-		conf.Sigv4Region = applied.Sigv4Region
+	if applied.SigV4Region.Valid {
+		conf.SigV4Region = applied.SigV4Region
 	}
 
-	if applied.Sigv4AccessKey.Valid {
-		conf.Sigv4AccessKey = applied.Sigv4AccessKey
+	if applied.SigV4AccessKey.Valid {
+		conf.SigV4AccessKey = applied.SigV4AccessKey
 	}
 
-	if applied.Sigv4SecretKey.Valid {
-		conf.Sigv4SecretKey = applied.Sigv4SecretKey
+	if applied.SigV4SecretKey.Valid {
+		conf.SigV4SecretKey = applied.SigV4SecretKey
 	}
 
 	if applied.PushInterval.Valid {
@@ -332,16 +332,16 @@ func parseEnvs(env map[string]string) (Config, error) {
 		}
 	}
 
-	if sigv4Region, sigv4RegionDefined := env["K6_PROMETHEUS_RW_SIGV4_REGION"]; sigv4RegionDefined {
-		c.Sigv4Region = null.StringFrom(sigv4Region)
+	if sigV4Region, sigV4RegionDefined := env["K6_PROMETHEUS_RW_SIGV4_REGION"]; sigV4RegionDefined {
+		c.SigV4Region = null.StringFrom(sigV4Region)
 	}
 
-	if sigv4AccessKey, sigv4AccessKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_ACCESS_KEY"]; sigv4AccessKeyDefined {
-		c.Sigv4AccessKey = null.StringFrom(sigv4AccessKey)
+	if sigV4AccessKey, sigV4AccessKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_ACCESS_KEY"]; sigV4AccessKeyDefined {
+		c.SigV4AccessKey = null.StringFrom(sigV4AccessKey)
 	}
 
-	if sigv4SecretKey, sigv4SecretKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_SECRET_KEY"]; sigv4SecretKeyDefined {
-		c.Sigv4SecretKey = null.StringFrom(sigv4SecretKey)
+	if sigV4SecretKey, sigV4SecretKeyDefined := env["K6_PROMETHEUS_RW_SIGV4_SECRET_KEY"]; sigV4SecretKeyDefined {
+		c.SigV4SecretKey = null.StringFrom(sigV4SecretKey)
 	}
 
 	if b, err := envBool(env, "K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM"); err != nil {
