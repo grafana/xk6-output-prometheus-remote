@@ -1,7 +1,9 @@
 package sigv4
 
 const (
-	awsServiceName   = "aps"
+	// Amazon Managed Service for Prometheus
+	awsServiceName = "aps"
+
 	signingAlgorithm = "AWS4-HMAC-SHA256"
 
 	authorizationHeaderKey = "Authorization"

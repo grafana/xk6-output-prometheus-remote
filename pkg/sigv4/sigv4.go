@@ -21,13 +21,20 @@ type Signer interface {
 
 type DefaultSigner struct {
 	config *Config
+
+	// noEscape represents the characters that AWS doesn't escape
+	noEscape [256]bool
 }
 
 func NewDefaultSigner(config *Config) Signer {
-	// initialize noEscape array. This way we can avoid using init() functions
-	for i := 0; i < len(noEscape); i++ {
+	ds := &DefaultSigner{
+		config:   config,
+		noEscape: [256]bool{},
+	}
+
+	for i := 0; i < len(ds.noEscape); i++ {
 		// AWS expects every character except these to be escaped
-		noEscape[i] = (i >= 'A' && i <= 'Z') ||
+		ds.noEscape[i] = (i >= 'A' && i <= 'Z') ||
 			(i >= 'a' && i <= 'z') ||
 			(i >= '0' && i <= '9') ||
 			i == '-' ||
@@ -36,7 +43,7 @@ func NewDefaultSigner(config *Config) Signer {
 			i == '~'
 	}
 
-	return &DefaultSigner{config: config}
+	return ds
 }
 
 func (d *DefaultSigner) Sign(req *http.Request) error {
@@ -59,7 +66,7 @@ func (d *DefaultSigner) Sign(req *http.Request) error {
 	canonicalQueryString := getCanonicalQueryString(req.URL)
 	canonicalReq := buildCanonicalString(
 		req.Method,
-		getCanonicalURI(req.URL),
+		getCanonicalURI(req.URL, d.noEscape),
 		canonicalQueryString,
 		canonicalHeaderStr,
 		signedHeadersStr,
@@ -136,6 +143,7 @@ var ignoredHeaders = map[string]struct{}{
 	"Expect":          struct{}{},
 }
 
+// buildCanonicalHeaders is mostly ported from https://github.com/aws/aws-sdk-go-v2/aws/signer/v4 buildCanonicalHeaders
 func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders, canonicalHeadersStr string) {
 	host, header, length := req.Host, req.Header, req.ContentLength
 
@@ -203,8 +211,8 @@ func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders
 	return signed, signedHeaders, canonicalHeadersStr
 }
 
-func getCanonicalURI(u *url.URL) string {
-	return escapePath(getURIPath(u), false)
+func getCanonicalURI(u *url.URL, noEscape [256]bool) string {
+	return escapePath(getURIPath(u), false, noEscape)
 }
 
 func getCanonicalQueryString(u *url.URL) string {

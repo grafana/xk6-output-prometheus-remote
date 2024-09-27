@@ -7,10 +7,9 @@ import (
 	"strings"
 )
 
-var noEscape [256]bool
-
 // escapePath escapes part of a URL path in Amazon style.
-func escapePath(path string, encodeSep bool) string {
+// inspired by github.com/aws/smithy-go/encoding/httpbinding EscapePath method
+func escapePath(path string, encodeSep bool, noEscape [256]bool) string {
 	var buf bytes.Buffer
 	for i := 0; i < len(path); i++ {
 		c := path[i]
@@ -25,6 +24,7 @@ func escapePath(path string, encodeSep bool) string {
 
 // stripExcessSpaces will rewrite the passed in slice's string values to not
 // contain multiple side-by-side spaces.
+// Ported from github.com/aws/aws-sdk-go-v2/aws/signer/internal/v4 StripExcessSpaces
 func stripExcessSpaces(str string) string {
 	const doubleSpace = "  "
 
@@ -65,6 +65,7 @@ func stripExcessSpaces(str string) string {
 }
 
 // getURIPath returns the escaped URI component from the provided URL.
+// Ported from github.com/aws/aws-sdk-go-v2/aws/signer/internal/v4 GetURIPath
 func getURIPath(u *url.URL) string {
 	var uriPath string
 
