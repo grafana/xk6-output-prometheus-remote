@@ -2,6 +2,7 @@ package sigv4
 
 import (
 	"github.com/stretchr/testify/assert"
+	"net/url"
 	"testing"
 )
 
@@ -37,5 +38,71 @@ func TestStripExcessSpaces(t *testing.T) {
 	for _, tc := range testcases {
 		assert.Equal(t, tc.want, stripExcessSpaces(tc.arg))
 	}
+}
 
+func TestGetUriPath(t *testing.T) {
+	t.Parallel()
+
+	testcases := map[string]struct {
+		arg  string
+		want string
+	}{
+		"schema and port": {
+			arg:  "https://localhost:9000",
+			want: "/",
+		},
+		"schema and no port": {
+			arg:  "https://localhost",
+			want: "/",
+		},
+		"no schema": {
+			arg:  "localhost:9000",
+			want: "/",
+		},
+		"no schema + path": {
+			arg:  "localhost:9000/abc123",
+			want: "/abc123",
+		},
+		"no schema, with separator": {
+			arg:  "//localhost:9000",
+			want: "/",
+		},
+		"no scheme, no port, with separator": {
+			arg:  "//localhost",
+			want: "/",
+		},
+		"no scheme, with separator, with path": {
+			arg:  "//localhost:9000/abc123",
+			want: "/abc123",
+		},
+		"no scheme, no port, with separator, with path": {
+			arg:  "//localhost/abc123",
+			want: "/abc123",
+		},
+		"no schema, query string": {
+			arg:  "localhost:9000/abc123?efg=456",
+			want: "/abc123",
+		},
+	}
+	for name, tc := range testcases {
+		u, err := url.Parse(tc.arg)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := getURIPath(u)
+		if tc.want != got {
+			t.Fatalf("test %v failed, want %v got %v \n", name, tc.want, got)
+		}
+	}
+}
+
+func TestGetUriPath_invalid_url_noescape(t *testing.T) {
+	arg := &url.URL{
+		Opaque: "//example.org/bucket/key-._~,!@#$%^&*()",
+	}
+
+	want := "/bucket/key-._~,!@#$%^&*()"
+	got := getURIPath(arg)
+	assert.Equal(t, want, got)
 }

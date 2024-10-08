@@ -49,30 +49,34 @@ func stripExcessSpaces(str string) string {
 }
 
 // getURIPath returns the escaped URI component from the provided URL.
-// Ported from github.com/aws/aws-sdk-go-v2/aws/signer/internal/v4 GetURIPath
+// Ported from inspired by github.com/aws/aws-sdk-go-v2/aws/signer/internal/v4 GetURIPath
 func getURIPath(u *url.URL) string {
 	var uriPath string
 
-	if len(u.Opaque) > 0 {
-		const schemeSep, pathSep, queryStart = "//", "/", "?"
-
-		opaque := u.Opaque
-		// Cut off the query string if present.
-		if idx := strings.Index(opaque, queryStart); idx >= 0 {
-			opaque = opaque[:idx]
-		}
-
-		// Cutout the scheme separator if present.
-		if strings.Index(opaque, schemeSep) == 0 {
-			opaque = opaque[len(schemeSep):]
-		}
-
-		// capture URI path starting with first path separator.
-		if idx := strings.Index(opaque, pathSep); idx >= 0 {
-			uriPath = opaque[idx:]
-		}
-	} else {
+	opaque := u.Opaque
+	if len(opaque) == 0 {
 		uriPath = u.EscapedPath()
+	}
+
+	if len(opaque) == 0 && len(uriPath) == 0 {
+		return "/"
+	}
+
+	const schemeSep, pathSep, queryStart = "//", "/", "?"
+
+	// Cutout the scheme separator if present.
+	if strings.Index(opaque, schemeSep) == 0 {
+		opaque = opaque[len(schemeSep):]
+	}
+
+	// Cut off the query string if present.
+	if idx := strings.Index(opaque, queryStart); idx >= 0 {
+		opaque = opaque[:idx]
+	}
+
+	// capture URI path starting with first path separator.
+	if idx := strings.Index(opaque, pathSep); idx >= 0 {
+		uriPath = opaque[idx:]
 	}
 
 	if len(uriPath) == 0 {
