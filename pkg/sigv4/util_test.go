@@ -33,6 +33,10 @@ func TestStripExcessSpaces(t *testing.T) {
 			arg:  "12     3       1abc123",
 			want: "12 3 1abc123",
 		},
+		{
+			arg:  "aaa \t bb",
+			want: "aaa bb",
+		},
 	}
 
 	for _, tc := range testcases {
@@ -98,6 +102,8 @@ func TestGetUriPath(t *testing.T) {
 }
 
 func TestGetUriPath_invalid_url_noescape(t *testing.T) {
+	t.Parallel()
+
 	arg := &url.URL{
 		Opaque: "//example.org/bucket/key-._~,!@#$%^&*()",
 	}
@@ -108,6 +114,8 @@ func TestGetUriPath_invalid_url_noescape(t *testing.T) {
 }
 
 func TestEscapePath(t *testing.T) {
+	t.Parallel()
+
 	testcases := []struct {
 		arg  string
 		want string

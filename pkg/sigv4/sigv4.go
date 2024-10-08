@@ -172,13 +172,22 @@ func buildCanonicalHeaders(req *http.Request) (signedHeaders, canonicalHeadersSt
 	signedHeaders = strings.Join(headers, ";")
 
 	var canonicalHeaders strings.Builder
-	for i := 0; i < len(headers); i++ {
-		if headers[i] == hostHeader {
+	for _, h := range headers {
+		if h == hostHeader {
 			canonicalHeaders.WriteString(fmt.Sprintf("%s:%s\n", hostHeader, stripExcessSpaces(host)))
 			continue
 		}
-		values := strings.Join(signed[headers[i]], ",")
-		canonicalHeaders.WriteString(fmt.Sprintf("%s:%s\n", headers[i], stripExcessSpaces(values)))
+
+		canonicalHeaders.WriteString(fmt.Sprintf("%s:", h))
+		values := signed[h]
+		for j, v := range values {
+			cleanedValue := strings.TrimSpace(stripExcessSpaces(v))
+			canonicalHeaders.WriteString(cleanedValue)
+			if j < len(values)-1 {
+				canonicalHeaders.WriteRune(',')
+			}
+		}
+		canonicalHeaders.WriteRune('\n')
 	}
 	canonicalHeadersStr = canonicalHeaders.String()
 	return signedHeaders, canonicalHeadersStr

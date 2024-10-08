@@ -43,7 +43,7 @@ func escapePath(path string, noEscape [256]bool) string {
 // stripExcessSpaces will remove the leading and trailing spaces, and side-by-side spaces are converted
 // into a single space.
 func stripExcessSpaces(str string) string {
-	if idx := strings.Index(str, "  "); idx < 0 {
+	if strings.Index(str, "  ") < 0 && strings.Index(str, "\t") < 0 {
 		return str
 	}
 
@@ -52,7 +52,7 @@ func stripExcessSpaces(str string) string {
 	const space = ' '
 	str = strings.TrimSpace(str)
 	for i := 0; i < len(str); i++ {
-		if str[i] == space {
+		if str[i] == space || str[i] == '\t' {
 			lastFoundSpace = i
 			continue
 		}

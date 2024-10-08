@@ -26,7 +26,11 @@ func TestTripper_request_includes_required_headers(t *testing.T) {
 	defer server.Close()
 
 	client := http.Client{}
-	tripper, err := NewRoundTripper(&Config{}, http.DefaultTransport)
+	tripper, err := NewRoundTripper(&Config{
+		Region:             "us-east1",
+		AwsSecretAccessKey: "xyz",
+		AwsAccessKeyID:     "abc",
+	}, http.DefaultTransport)
 	if err != nil {
 		t.Fatal(err)
 	}
