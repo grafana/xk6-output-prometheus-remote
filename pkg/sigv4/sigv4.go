@@ -50,7 +50,7 @@ func (d *DefaultSigner) Sign(req *http.Request) error {
 	req.Header.Set(amzDateKey, iSO8601Date)
 	req.Header.Set(contentSHAKey, payloadHash)
 
-	_, signedHeadersStr, canonicalHeaderStr := buildCanonicalHeaders(req)
+	signedHeadersStr, canonicalHeaderStr := buildCanonicalHeaders(req)
 
 	canonicalQueryString := getCanonicalQueryString(req.URL)
 	canonicalReq := buildCanonicalString(
@@ -133,17 +133,14 @@ var ignoredHeaders = map[string]struct{}{
 }
 
 // buildCanonicalHeaders is mostly ported from https://github.com/aws/aws-sdk-go-v2/aws/signer/v4 buildCanonicalHeaders
-func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders, canonicalHeadersStr string) {
+func buildCanonicalHeaders(req *http.Request) (signedHeaders, canonicalHeadersStr string) {
+	const hostHeader, contentLengthHeader = "host", "content-length"
 	host, header, length := req.Host, req.Header, req.ContentLength
 
-	signed = make(http.Header)
-
-	var headers []string
-	const hostHeader = "host"
-	headers = append(headers, hostHeader)
+	signed := make(http.Header)
+	headers := append([]string{}, hostHeader)
 	signed[hostHeader] = append(signed[hostHeader], host)
 
-	const contentLengthHeader = "content-length"
 	if length > 0 {
 		headers = append(headers, contentLengthHeader)
 		signed[contentLengthHeader] = append(signed[contentLengthHeader], strconv.FormatInt(length, 10))
@@ -151,8 +148,9 @@ func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders
 
 	for k, v := range header {
 		if _, ok := ignoredHeaders[k]; ok {
-			continue // ignored header
+			continue
 		}
+
 		if strings.EqualFold(k, contentLengthHeader) {
 			// prevent signing already handled content-length header.
 			continue
@@ -168,36 +166,22 @@ func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders
 		headers = append(headers, lowerCaseKey)
 		signed[lowerCaseKey] = v
 	}
-	sort.Strings(headers)
 
+	// aws requires headers to keys to be sorted
+	sort.Strings(headers)
 	signedHeaders = strings.Join(headers, ";")
 
 	var canonicalHeaders strings.Builder
-	n := len(headers)
-	const colon = ':'
-	for i := 0; i < n; i++ {
+	for i := 0; i < len(headers); i++ {
 		if headers[i] == hostHeader {
-			canonicalHeaders.WriteString(hostHeader)
-			canonicalHeaders.WriteRune(colon)
-			canonicalHeaders.WriteString(stripExcessSpaces(host))
-		} else {
-			canonicalHeaders.WriteString(headers[i])
-			canonicalHeaders.WriteRune(colon)
-			// Trim out leading, trailing, and dedup inner spaces from signed header values.
-			values := signed[headers[i]]
-			for j, v := range values {
-				cleanedValue := strings.TrimSpace(stripExcessSpaces(v))
-				canonicalHeaders.WriteString(cleanedValue)
-				if j < len(values)-1 {
-					canonicalHeaders.WriteRune(',')
-				}
-			}
+			canonicalHeaders.WriteString(fmt.Sprintf("%s:%s\n", hostHeader, stripExcessSpaces(host)))
+			continue
 		}
-		canonicalHeaders.WriteRune('\n')
+		values := strings.Join(signed[headers[i]], ",")
+		canonicalHeaders.WriteString(fmt.Sprintf("%s:%s\n", headers[i], stripExcessSpaces(values)))
 	}
 	canonicalHeadersStr = canonicalHeaders.String()
-
-	return signed, signedHeaders, canonicalHeadersStr
+	return signedHeaders, canonicalHeadersStr
 }
 
 func getCanonicalURI(u *url.URL, noEscape [256]bool) string {
