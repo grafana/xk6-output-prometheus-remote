@@ -29,18 +29,7 @@ type DefaultSigner struct {
 func NewDefaultSigner(config *Config) Signer {
 	ds := &DefaultSigner{
 		config:   config,
-		noEscape: [256]bool{},
-	}
-
-	for i := 0; i < len(ds.noEscape); i++ {
-		// AWS expects every character except these to be escaped
-		ds.noEscape[i] = (i >= 'A' && i <= 'Z') ||
-			(i >= 'a' && i <= 'z') ||
-			(i >= '0' && i <= '9') ||
-			i == '-' ||
-			i == '.' ||
-			i == '_' ||
-			i == '~'
+		noEscape: buildAwsNoEscape(),
 	}
 
 	return ds
@@ -212,7 +201,7 @@ func buildCanonicalHeaders(req *http.Request) (signed http.Header, signedHeaders
 }
 
 func getCanonicalURI(u *url.URL, noEscape [256]bool) string {
-	return escapePath(getURIPath(u), false, noEscape)
+	return escapePath(getURIPath(u), noEscape)
 }
 
 func getCanonicalQueryString(u *url.URL) string {

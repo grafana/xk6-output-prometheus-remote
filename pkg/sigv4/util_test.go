@@ -106,3 +106,45 @@ func TestGetUriPath_invalid_url_noescape(t *testing.T) {
 	got := getURIPath(arg)
 	assert.Equal(t, want, got)
 }
+
+func TestEscapePath(t *testing.T) {
+	testcases := []struct {
+		arg  string
+		want string
+	}{
+		{
+			arg:  "/",
+			want: "/",
+		},
+		{
+			arg:  "/abc",
+			want: "/abc",
+		},
+		{
+			arg:  "/abc129",
+			want: "/abc129",
+		},
+		{
+			arg:  "/abc-def",
+			want: "/abc-def",
+		},
+		{
+			arg:  "/abc.xyz~123-456",
+			want: "/abc.xyz~123-456",
+		},
+		{
+			arg:  "/abc def-ghi",
+			want: "/abc%20def-ghi",
+		},
+		{
+			arg:  "abc!def ghi",
+			want: "abc%21def%20ghi",
+		},
+	}
+
+	noEscape := buildAwsNoEscape()
+
+	for _, tc := range testcases {
+		assert.Equal(t, tc.want, escapePath(tc.arg, noEscape))
+	}
+}
