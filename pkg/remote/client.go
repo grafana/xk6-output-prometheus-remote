@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"io"
 	"math"
 	"net/http"
@@ -22,6 +23,7 @@ type HTTPConfig struct {
 	Timeout   time.Duration
 	TLSConfig *tls.Config
 	BasicAuth *BasicAuth
+	SigV4     *sigv4.Config
 	Headers   http.Header
 }
 
@@ -59,6 +61,13 @@ func NewWriteClient(endpoint string, cfg *HTTPConfig) (*WriteClient, error) {
 		wc.hc.Transport = &http.Transport{
 			TLSClientConfig: cfg.TLSConfig,
 		}
+	}
+	if cfg.SigV4 != nil {
+		tripper, err := sigv4.NewRoundTripper(cfg.SigV4, wc.hc.Transport)
+		if err != nil {
+			return nil, err
+		}
+		wc.hc.Transport = tripper
 	}
 	return wc, nil
 }
