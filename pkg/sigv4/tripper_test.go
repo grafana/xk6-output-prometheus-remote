@@ -43,3 +43,52 @@ func TestTripper_request_includes_required_headers(t *testing.T) {
 
 	client.Do(req)
 }
+
+func TestConfig_Validation(t *testing.T) {
+	testCases := []struct {
+		shouldError bool
+		arg         *Config
+	}{
+		{
+			shouldError: false,
+			arg: &Config{
+				Region:             "us-east1",
+				AwsAccessKeyID:     "someAccessKey",
+				AwsSecretAccessKey: "someSecretKey",
+			},
+		},
+		{
+			shouldError: true,
+			arg:         nil,
+		},
+		{
+			shouldError: true,
+			arg: &Config{
+				Region: "us-east1",
+			},
+		},
+		{
+			shouldError: true,
+			arg: &Config{
+				Region:         "us-east1",
+				AwsAccessKeyID: "someAccessKeyId",
+			},
+		},
+		{
+			shouldError: true,
+			arg: &Config{
+				AwsAccessKeyID:     "SomeAccessKey",
+				AwsSecretAccessKey: "SomeSecretKey",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := tc.arg.validate()
+		if tc.shouldError {
+			assert.Error(t, got)
+			continue
+		}
+		assert.NoError(t, got)
+	}
+}

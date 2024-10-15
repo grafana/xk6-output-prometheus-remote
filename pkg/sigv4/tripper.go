@@ -14,31 +14,32 @@ type Tripper struct {
 
 type Config struct {
 	Region             string
-	AwsSecretAccessKey string
 	AwsAccessKeyID     string
+	AwsSecretAccessKey string
+}
+
+func (c *Config) validate() error {
+	if c == nil {
+		return errors.New("config should not be nil")
+	}
+	hasRegion := len(strings.TrimSpace(c.Region)) != 0
+	hasAccessID := len(strings.TrimSpace(c.AwsAccessKeyID)) != 0
+	hasSecretAccessKey := len(strings.TrimSpace(c.AwsSecretAccessKey)) != 0
+	if !hasRegion || !hasAccessID || !hasSecretAccessKey {
+		return errors.New("sigV4 config `Region`, `AwsAccessKeyID`, `AwsSecretAccessKey` must all be set")
+	}
+	return nil
 }
 
 func NewRoundTripper(config *Config, next http.RoundTripper) (*Tripper, error) {
-	if config == nil {
-		return nil, errors.New("can't initialize a sigv4 round tripper with nil config")
-	}
-
-	if len(strings.TrimSpace(config.Region)) == 0 {
-		return nil, errors.New("sigV4 config `Region` must be set")
-	}
-
-	if len(strings.TrimSpace(config.AwsSecretAccessKey)) == 0 {
-		return nil, errors.New("sigV4 config `AwsSecretAccessKey` must be set")
-	}
-
-	if len(strings.TrimSpace(config.AwsAccessKeyID)) == 0 {
-		return nil, errors.New("sigV4 config `AwsAccessKeyID` must be set")
+	if err := config.validate(); err != nil {
+		return nil, err
 	}
 
 	if next == nil {
 		next = http.DefaultTransport
 	}
-	
+
 	tripper := &Tripper{
 		config: config,
 		next:   next,

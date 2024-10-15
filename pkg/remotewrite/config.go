@@ -3,6 +3,7 @@ package remotewrite
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"net/http"
@@ -121,6 +122,14 @@ func (conf Config) RemoteConfig() (*remote.HTTPConfig, error) {
 			return nil, fmt.Errorf("failed to load the TLS certificate: %w", err)
 		}
 		hc.TLSConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	if isSigV4PartiallyConfigured(conf.SigV4Region, conf.SigV4AccessKey, conf.SigV4SecretKey) {
+		return nil, errors.New(
+			"sigv4 seems to be partially configured. All of " +
+				"K6_PROMETHEUS_RW_SIGV4_REGION, K6_PROMETHEUS_RW_SIGV4_ACCESS_KEY, K6_PROMETHEUS_RW_SIGV4_SECRET_KEY " +
+				"must all be set. Unset all to bypass sigv4",
+		)
 	}
 
 	if conf.SigV4Region.Valid && conf.SigV4AccessKey.Valid && conf.SigV4SecretKey.Valid {
@@ -428,4 +437,13 @@ func parseArg(text string) (Config, error) {
 	}
 
 	return c, nil
+}
+
+func isSigV4PartiallyConfigured(region, accessKey, secretKey null.String) bool {
+	hasRegion := region.Valid && len(strings.TrimSpace(region.String)) != 0
+	hasAccessID := accessKey.Valid && len(strings.TrimSpace(accessKey.String)) != 0
+	hasSecretAccessKey := secretKey.Valid && len(strings.TrimSpace(secretKey.String)) != 0
+	// either they are all set, or all not set. False if partial
+	isComplete := (hasRegion && hasAccessID && hasSecretAccessKey) || (!hasRegion && !hasAccessID && !hasSecretAccessKey)
+	return !isComplete
 }
