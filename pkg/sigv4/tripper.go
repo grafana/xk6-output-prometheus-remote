@@ -8,7 +8,7 @@ import (
 
 type Tripper struct {
 	config *Config
-	signer Signer
+	signer signer
 	next   http.RoundTripper
 }
 
@@ -42,13 +42,13 @@ func NewRoundTripper(config *Config, next http.RoundTripper) (*Tripper, error) {
 	tripper := &Tripper{
 		config: config,
 		next:   next,
-		signer: NewDefaultSigner(config),
+		signer: newDefaultSigner(config),
 	}
 	return tripper, nil
 }
 
 func (c *Tripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	if err := c.signer.Sign(req); err != nil {
+	if err := c.signer.sign(req); err != nil {
 		return nil, err
 	}
 	return c.next.RoundTrip(req)

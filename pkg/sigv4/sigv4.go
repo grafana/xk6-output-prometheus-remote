@@ -15,19 +15,19 @@ import (
 	"time"
 )
 
-type Signer interface {
-	Sign(req *http.Request) error
+type signer interface {
+	sign(req *http.Request) error
 }
 
-type DefaultSigner struct {
+type defaultSigner struct {
 	config *Config
 
 	// noEscape represents the characters that AWS doesn't escape
 	noEscape [256]bool
 }
 
-func NewDefaultSigner(config *Config) Signer {
-	ds := &DefaultSigner{
+func newDefaultSigner(config *Config) signer {
+	ds := &defaultSigner{
 		config:   config,
 		noEscape: buildAwsNoEscape(),
 	}
@@ -35,7 +35,7 @@ func NewDefaultSigner(config *Config) Signer {
 	return ds
 }
 
-func (d *DefaultSigner) Sign(req *http.Request) error {
+func (d *defaultSigner) sign(req *http.Request) error {
 	now := time.Now().UTC()
 	iSO8601Date := now.Format(timeFormat)
 
@@ -81,7 +81,7 @@ func (d *DefaultSigner) Sign(req *http.Request) error {
 	return nil
 }
 
-func (d *DefaultSigner) getPayloadHash(req *http.Request) (string, error) {
+func (d *defaultSigner) getPayloadHash(req *http.Request) (string, error) {
 	if req.Body == nil {
 		return emptyStringSHA256, nil
 	}
