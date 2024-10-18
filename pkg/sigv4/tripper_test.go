@@ -45,6 +45,8 @@ func TestTripper_request_includes_required_headers(t *testing.T) {
 }
 
 func TestConfig_Validation(t *testing.T) {
+	t.Parallel()
+	
 	testCases := []struct {
 		shouldError bool
 		arg         *Config

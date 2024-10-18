@@ -49,7 +49,7 @@ func TestBuildCanonicalHeaders(t *testing.T) {
 		"",
 	}, "\n")
 
-	gotSignedHeaders, gotCanonicalHeader := buildCanonicalHeaders(req)
+	gotSignedHeaders, gotCanonicalHeader := buildCanonicalHeaders(req, nil)
 	assert.Equal(t, wantSignedHeader, gotSignedHeaders)
 	assert.Equal(t, wantCanonicalHeader, gotCanonicalHeader)
 

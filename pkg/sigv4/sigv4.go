@@ -1,3 +1,4 @@
+// Package sigv4 is responsible to for aws sigv4 signing of requests
 package sigv4
 
 import (
@@ -24,12 +25,20 @@ type defaultSigner struct {
 
 	// noEscape represents the characters that AWS doesn't escape
 	noEscape [256]bool
+
+	ignoredHeaders map[string]struct{}
 }
 
 func newDefaultSigner(config *Config) signer {
 	ds := &defaultSigner{
 		config:   config,
 		noEscape: buildAwsNoEscape(),
+		ignoredHeaders: map[string]struct{}{
+			"Authorization":   struct{}{},
+			"User-Agent":      struct{}{},
+			"X-Amzn-Trace-Id": struct{}{},
+			"Expect":          struct{}{},
+		},
 	}
 
 	return ds
@@ -50,7 +59,7 @@ func (d *defaultSigner) sign(req *http.Request) error {
 	req.Header.Set(amzDateKey, iSO8601Date)
 	req.Header.Set(contentSHAKey, payloadHash)
 
-	signedHeadersStr, canonicalHeaderStr := buildCanonicalHeaders(req)
+	signedHeadersStr, canonicalHeaderStr := buildCanonicalHeaders(req, d.ignoredHeaders)
 
 	canonicalQueryString := getCanonicalQueryString(req.URL)
 	canonicalReq := buildCanonicalString(
@@ -125,15 +134,8 @@ func buildCanonicalString(method, uri, query, canonicalHeaders, signedHeaders, p
 	}, "\n")
 }
 
-var ignoredHeaders = map[string]struct{}{
-	"Authorization":   struct{}{},
-	"User-Agent":      struct{}{},
-	"X-Amzn-Trace-Id": struct{}{},
-	"Expect":          struct{}{},
-}
-
 // buildCanonicalHeaders is mostly ported from https://github.com/aws/aws-sdk-go-v2/aws/signer/v4 buildCanonicalHeaders
-func buildCanonicalHeaders(req *http.Request) (signedHeaders, canonicalHeadersStr string) {
+func buildCanonicalHeaders(req *http.Request, ignoredHeaders map[string]struct{}) (signedHeaders, canonicalHeadersStr string) {
 	const hostHeader, contentLengthHeader = "host", "content-length"
 	host, header, length := req.Host, req.Header, req.ContentLength
 

@@ -6,12 +6,14 @@ import (
 	"strings"
 )
 
+// Tripper signs each request with sigv4
 type Tripper struct {
 	config *Config
 	signer signer
 	next   http.RoundTripper
 }
 
+// Config holds aws access configurations
 type Config struct {
 	Region             string
 	AwsAccessKeyID     string
@@ -31,6 +33,7 @@ func (c *Config) validate() error {
 	return nil
 }
 
+// NewRoundTripper creates a new sigv4 round tripper
 func NewRoundTripper(config *Config, next http.RoundTripper) (*Tripper, error) {
 	if err := config.validate(); err != nil {
 		return nil, err
@@ -48,6 +51,7 @@ func NewRoundTripper(config *Config, next http.RoundTripper) (*Tripper, error) {
 	return tripper, nil
 }
 
+// RoundTrip implements the tripper interface for sigv4 signing of requests
 func (c *Tripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err := c.signer.sign(req); err != nil {
 		return nil, err
