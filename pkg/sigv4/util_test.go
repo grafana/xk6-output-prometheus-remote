@@ -1,9 +1,10 @@
 package sigv4
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStripExcessSpaces(t *testing.T) {

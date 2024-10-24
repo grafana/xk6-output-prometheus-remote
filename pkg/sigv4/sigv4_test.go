@@ -1,11 +1,13 @@
 package sigv4
 
 import (
-	"github.com/stretchr/testify/assert"
+	"context"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildCanonicalHeaders(t *testing.T) {
@@ -18,7 +20,7 @@ func TestBuildCanonicalHeaders(t *testing.T) {
 	now := time.Now().UTC()
 	iSO8601Date := now.Format(timeFormat)
 
-	req, err := http.NewRequest("POST", endpoint, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, nil)
 	if err != nil {
 		t.Fatalf("failed to create request, %v", err)
 	}
@@ -52,5 +54,4 @@ func TestBuildCanonicalHeaders(t *testing.T) {
 	gotSignedHeaders, gotCanonicalHeader := buildCanonicalHeaders(req, nil)
 	assert.Equal(t, wantSignedHeader, gotSignedHeaders)
 	assert.Equal(t, wantCanonicalHeader, gotCanonicalHeader)
-
 }

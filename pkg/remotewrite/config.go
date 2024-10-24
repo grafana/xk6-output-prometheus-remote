@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 
 	"github.com/grafana/xk6-output-prometheus-remote/pkg/remote"
 	"go.k6.io/k6/lib/types"

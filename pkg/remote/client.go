@@ -6,12 +6,13 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 	"io"
 	"math"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/grafana/xk6-output-prometheus-remote/pkg/sigv4"
 
 	prompb "buf.build/gen/go/prometheus/prometheus/protocolbuffers/go"
 	"github.com/klauspost/compress/snappy"

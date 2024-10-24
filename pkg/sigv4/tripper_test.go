@@ -1,10 +1,12 @@
 package sigv4
 
 import (
-	"github.com/stretchr/testify/assert"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTripper_request_includes_required_headers(t *testing.T) {
@@ -36,17 +38,18 @@ func TestTripper_request_includes_required_headers(t *testing.T) {
 	}
 	client.Transport = tripper
 
-	req, err := http.NewRequest("POST", server.URL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, server.URL, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.Do(req)
+	response, _ := client.Do(req)
+	_ = response.Body.Close()
 }
 
 func TestConfig_Validation(t *testing.T) {
 	t.Parallel()
-	
+
 	testCases := []struct {
 		shouldError bool
 		arg         *Config

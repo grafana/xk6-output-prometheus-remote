@@ -34,10 +34,10 @@ func newDefaultSigner(config *Config) signer {
 		config:   config,
 		noEscape: buildAwsNoEscape(),
 		ignoredHeaders: map[string]struct{}{
-			"Authorization":   struct{}{},
-			"User-Agent":      struct{}{},
-			"X-Amzn-Trace-Id": struct{}{},
-			"Expect":          struct{}{},
+			"Authorization":   {},
+			"User-Agent":      {},
+			"X-Amzn-Trace-Id": {},
+			"Expect":          {},
 		},
 	}
 
@@ -135,7 +135,10 @@ func buildCanonicalString(method, uri, query, canonicalHeaders, signedHeaders, p
 }
 
 // buildCanonicalHeaders is mostly ported from https://github.com/aws/aws-sdk-go-v2/aws/signer/v4 buildCanonicalHeaders
-func buildCanonicalHeaders(req *http.Request, ignoredHeaders map[string]struct{}) (signedHeaders, canonicalHeadersStr string) {
+func buildCanonicalHeaders(
+	req *http.Request,
+	ignoredHeaders map[string]struct{},
+) (signedHeaders, canonicalHeadersStr string) {
 	const hostHeader, contentLengthHeader = "host", "content-length"
 	host, header, length := req.Host, req.Header, req.ContentLength
 
@@ -208,7 +211,7 @@ func getCanonicalQueryString(u *url.URL) string {
 	}
 
 	var rawQuery strings.Builder
-	rawQuery.WriteString(strings.Replace(query.Encode(), "+", "%20", -1))
+	rawQuery.WriteString(strings.ReplaceAll(query.Encode(), "+", "%20"))
 	return rawQuery.String()
 }
 
