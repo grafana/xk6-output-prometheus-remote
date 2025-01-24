@@ -337,7 +337,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [],
+          "calcs": [
+            "max"
+          ],
           "fields": "",
           "values": false
         },
@@ -401,7 +403,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [],
+          "calcs": [
+            "max"
+          ],
           "fields": "",
           "values": false
         },
