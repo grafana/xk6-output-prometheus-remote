@@ -4,6 +4,8 @@ package remotewrite
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/push"
 	"strings"
 	"time"
 
@@ -224,6 +226,42 @@ func (o *Output) flush() {
 	// Prometheus write handler processes only some fields as of now, so here we'll add only them.
 
 	promTimeSeries := o.convertToPbSeries(samplesContainers)
+
+	collectors := make([]prometheus.Collector, 0, len(promTimeSeries))
+	registry := prometheus.NewPedanticRegistry()
+	for _, s := range promTimeSeries {
+		fmt.Printf("Labels: %s, samples %s, histogram %s\n", s.Labels, s.Samples, s.Histograms)
+
+		var metricName string
+		labelMap := make(map[string]string)
+		for _, label := range s.Labels {
+			if label.GetName() == "__name__" {
+				metricName = label.GetValue()
+			} else {
+				labelMap[label.Name] = label.Value
+			}
+		}
+
+		captured := s.Samples[0].Value
+		collector := prometheus.NewUntypedFunc(prometheus.UntypedOpts{
+			Name:        metricName,
+			ConstLabels: labelMap,
+		}, func() float64 {
+			return captured
+		})
+
+		collectors = append(collectors, collector)
+		registry.Register(collector)
+	}
+
+	// registry.MustRegister(collectors...)
+
+	if err := push.New("http://localhost:9091", "db_backup").
+		Gatherer(registry).
+		Add(); err != nil {
+		fmt.Println("Could not push completion time to Pushgateway:", err)
+	}
+
 	nts = len(promTimeSeries)
 	o.logger.WithField("nts", nts).Debug("Converted samples to Prometheus TimeSeries")
 
