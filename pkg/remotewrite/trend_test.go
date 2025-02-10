@@ -59,8 +59,13 @@ func TestExtendedTrendSinkMapPrompb(t *testing.T) {
 	ts := st.MapPrompb(sample.TimeSeries, sample.Time)
 	require.Len(t, ts, 8)
 
-	sortByNameLabel(ts)
-	assertTimeSeriesEqual(t, expected, ts)
+	tsConverted := make([]*prompb.TimeSeries, len(ts))
+	for i, s := range ts {
+		tsConverted[i] = s.Series
+		assert.Equal(t, metrics.Gauge, s.Type)
+	}
+	sortByNameLabel(tsConverted)
+	assertTimeSeriesEqual(t, expected, tsConverted)
 }
 
 func TestTrendAsGaugesFindIxName(t *testing.T) {
@@ -153,7 +158,7 @@ func TestNativeHistogramSinkMapPrompb(t *testing.T) {
 	// It should be the easiest way for asserting the entire struct,
 	// because the structs contains a bunch of internals value that we don't want to assert.
 	require.Len(t, ts, 1)
-	b, err := protojson.Marshal(ts[0])
+	b, err := protojson.Marshal(ts[0].Series)
 	require.NoError(t, err)
 
 	expected := `{"labels":[{"name":"__name__","value":"k6_test"},{"name":"tagk1","value":"tagv1"}],"histograms":[{"countInt":"2","positiveDeltas":["1","0"],"positiveSpans":[{"length":1,"offset":5},{"length":1,"offset":8}],"schema":3,"sum":4.66,"timestamp":"3000","zeroCountInt":"0","zeroThreshold":2.938735877055719e-39}]}`
@@ -199,7 +204,8 @@ func TestNativeHistogramSinkMapPrompbWithValueType(t *testing.T) {
 	})
 	ts := st.MapPrompb(series, time.Unix(2, 0))
 	require.Len(t, ts, 1)
-	assert.Equal(t, "k6_test_seconds", ts[0].Labels[0].Value)
+	assert.Equal(t, metrics.Trend, ts[0].Type)
+	assert.Equal(t, "k6_test_seconds", ts[0].Series.Labels[0].Value)
 }
 
 func TestBaseUnit(t *testing.T) {

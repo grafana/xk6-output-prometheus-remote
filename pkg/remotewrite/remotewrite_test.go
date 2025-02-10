@@ -108,8 +108,16 @@ func TestOutputConvertToPbSeries(t *testing.T) {
 		},
 	}
 
-	sortByNameLabel(pbseries)
-	assert.Equal(t, exp, pbseries)
+	sortWithTypeByNameLabel(pbseries)
+
+	series := make([]*prompb.TimeSeries, len(pbseries))
+	types := make([]metrics.MetricType, len(pbseries))
+	for i, s := range pbseries {
+		series[i] = s.Series
+		types[i] = s.Type
+	}
+	assert.Equal(t, exp, series)
+	assert.Equal(t, []metrics.MetricType{metrics.Counter, metrics.Counter, metrics.Rate}, types)
 }
 
 //nolint:paralleltest,tparallel

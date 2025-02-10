@@ -133,18 +133,20 @@ func (o *Output) staleMarkers() []*prompb.TimeSeries {
 		// the unique exception where more than 1 is expected is when
 		// trend stats have been configured with multiple values.
 		for _, s := range series {
-			if len(s.Samples) < 1 {
-				if len(s.Histograms) < 1 {
+			if len(s.Series.Samples) < 1 {
+				if len(s.Series.Histograms) < 1 {
 					panic("data integrity check: samples and native histograms" +
 						" can't be empty at the same time")
 				}
-				s.Samples = append(s.Samples, &prompb.Sample{})
+				s.Series.Samples = append(s.Series.Samples, &prompb.Sample{})
 			}
 
-			s.Samples[0].Value = stale.Marker
-			s.Samples[0].Timestamp = timestamp
+			s.Series.Samples[0].Value = stale.Marker
+			s.Series.Samples[0].Timestamp = timestamp
 		}
-		staleMarkers = append(staleMarkers, series...)
+		for _, s := range series {
+			staleMarkers = append(staleMarkers, s.Series)
+		}
 	}
 	return staleMarkers
 }
@@ -225,11 +227,15 @@ func (o *Output) flush() {
 	// c) not have duplicate timestamps within 1 timeseries, see https://github.com/prometheus/prometheus/issues/9210
 	// Prometheus write handler processes only some fields as of now, so here we'll add only them.
 
-	promTimeSeries := o.convertToPbSeries(samplesContainers)
+	promTimeSeriesWithType := o.convertToPbSeries(samplesContainers)
 
-	collectors := make([]prometheus.Collector, 0, len(promTimeSeries))
+	collectors := make([]prometheus.Collector, 0, len(promTimeSeriesWithType))
 	registry := prometheus.NewPedanticRegistry()
-	for _, s := range promTimeSeries {
+	pusher := push.New("http://localhost:9091", "db_backup").
+		Gatherer(registry)
+
+	for _, promSeriesWithType := range promTimeSeriesWithType {
+		s := promSeriesWithType.Series
 		fmt.Printf("Labels: %s, samples %s, histogram %s\n", s.Labels, s.Samples, s.Histograms)
 
 		var metricName string
@@ -243,12 +249,32 @@ func (o *Output) flush() {
 		}
 
 		captured := s.Samples[0].Value
-		collector := prometheus.NewUntypedFunc(prometheus.UntypedOpts{
-			Name:        metricName,
-			ConstLabels: labelMap,
-		}, func() float64 {
-			return captured
-		})
+
+		var collector prometheus.Collector
+
+		switch promSeriesWithType.Type {
+		case metrics.Counter:
+			collector = prometheus.NewCounterFunc(prometheus.CounterOpts{
+				Name:        metricName,
+				ConstLabels: labelMap,
+			}, func() float64 {
+				return captured
+			})
+		case metrics.Gauge:
+			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name:        metricName,
+				ConstLabels: labelMap,
+			}, func() float64 {
+				return captured
+			})
+		default:
+			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name:        metricName,
+				ConstLabels: labelMap,
+			}, func() float64 {
+				return captured
+			})
+		}
 
 		collectors = append(collectors, collector)
 		registry.Register(collector)
@@ -256,14 +282,18 @@ func (o *Output) flush() {
 
 	// registry.MustRegister(collectors...)
 
-	if err := push.New("http://localhost:9091", "db_backup").
-		Gatherer(registry).
+	if err := pusher.
 		Add(); err != nil {
 		fmt.Println("Could not push completion time to Pushgateway:", err)
 	}
 
-	nts = len(promTimeSeries)
+	nts = len(promTimeSeriesWithType)
 	o.logger.WithField("nts", nts).Debug("Converted samples to Prometheus TimeSeries")
+
+	promTimeSeries := make([]*prompb.TimeSeries, len(promTimeSeriesWithType))
+	for i, seriesWithType := range promTimeSeriesWithType {
+		promTimeSeries[i] = seriesWithType.Series
+	}
 
 	if err := o.client.Store(context.Background(), promTimeSeries); err != nil {
 		o.logger.WithError(err).Error("Failed to send the time series data to the endpoint")
@@ -271,7 +301,7 @@ func (o *Output) flush() {
 	}
 }
 
-func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) []*prompb.TimeSeries {
+func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) []prompbSeriesWithType {
 	// The seen map is required because the samples containers
 	// could have several samples for the same time series
 	//  in this way, we can aggregate and flush them in a unique value
@@ -329,11 +359,16 @@ func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) 
 		}
 	}
 
-	pbseries := make([]*prompb.TimeSeries, 0, len(seen))
+	pbseries := make([]prompbSeriesWithType, 0, len(seen))
 	for s := range seen {
 		pbseries = append(pbseries, o.tsdb[s].MapPrompb()...)
 	}
 	return pbseries
+}
+
+type prompbSeriesWithType struct {
+	Series *prompb.TimeSeries
+	Type   metrics.MetricType
 }
 
 type seriesWithMeasure struct {
@@ -351,8 +386,8 @@ type seriesWithMeasure struct {
 }
 
 // TODO: add unit tests
-func (swm seriesWithMeasure) MapPrompb() []*prompb.TimeSeries {
-	var newts []*prompb.TimeSeries
+func (swm seriesWithMeasure) MapPrompb() []prompbSeriesWithType {
+	var newts []prompbSeriesWithType
 
 	mapMonoSeries := func(s metrics.TimeSeries, suffix string, t time.Time) prompb.TimeSeries {
 		return prompb.TimeSeries{
@@ -368,19 +403,19 @@ func (swm seriesWithMeasure) MapPrompb() []*prompb.TimeSeries {
 	case metrics.Counter:
 		ts := mapMonoSeries(swm.TimeSeries, "total", swm.Latest)
 		ts.Samples[0].Value = swm.Measure.(*metrics.CounterSink).Value
-		newts = []*prompb.TimeSeries{&ts}
+		newts = []prompbSeriesWithType{{Series: &ts, Type: metrics.Counter}}
 
 	case metrics.Gauge:
 		ts := mapMonoSeries(swm.TimeSeries, "", swm.Latest)
 		ts.Samples[0].Value = swm.Measure.(*metrics.GaugeSink).Value
-		newts = []*prompb.TimeSeries{&ts}
+		newts = []prompbSeriesWithType{{Series: &ts, Type: metrics.Gauge}}
 
 	case metrics.Rate:
 		ts := mapMonoSeries(swm.TimeSeries, "rate", swm.Latest)
 		// pass zero duration here because time is useless for formatting rate
 		rateVals := swm.Measure.(*metrics.RateSink).Format(time.Duration(0))
 		ts.Samples[0].Value = rateVals["rate"]
-		newts = []*prompb.TimeSeries{&ts}
+		newts = []prompbSeriesWithType{{Series: &ts, Type: metrics.Rate}}
 
 	case metrics.Trend:
 		// TODO:
@@ -406,7 +441,7 @@ func (swm seriesWithMeasure) MapPrompb() []*prompb.TimeSeries {
 }
 
 type prompbMapper interface {
-	MapPrompb(series metrics.TimeSeries, t time.Time) []*prompb.TimeSeries
+	MapPrompb(series metrics.TimeSeries, t time.Time) []prompbSeriesWithType
 }
 
 func newSeriesWithMeasure(
