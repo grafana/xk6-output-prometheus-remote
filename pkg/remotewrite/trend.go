@@ -125,10 +125,24 @@ type nativeHistogramSink struct {
 	H prometheus.Histogram
 }
 
-func newNativeHistogramSink(m *metrics.Metric) *nativeHistogramSink {
+func newNativeHistogramSink(ts *metrics.TimeSeries) *nativeHistogramSink {
+	// Create histogram with exportable name and labels, as this instance is
+	// exported as is when exporting to a pushgateway
+	suffix := baseUnit(ts.Metric.Contains)
+	labels := MapSeries(*ts, suffix)
+	constLabels := make(map[string]string, len(labels))
+	var metricName string
+	for _, label := range labels {
+		if label.Name == namelbl {
+			metricName = label.Value
+		} else {
+			constLabels[label.Name] = label.Value
+		}
+	}
 	return &nativeHistogramSink{
 		H: prometheus.NewHistogram(prometheus.HistogramOpts{
-			Name: m.Name,
+			Name:        metricName,
+			ConstLabels: constLabels,
 			// 1.1 is the starting value suggested by Prometheus'
 			// It sounds good considering the general purpose
 			// it have to address.

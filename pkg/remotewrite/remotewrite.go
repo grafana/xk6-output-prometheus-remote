@@ -238,22 +238,13 @@ func (o *Output) flush() {
 		s := promSeriesWithType.Series
 		fmt.Printf("Labels: %s, samples %s, histogram %s\n", s.Labels, s.Samples, s.Histograms)
 
-		var metricName string
-		labelMap := make(map[string]string)
-		for _, label := range s.Labels {
-			if label.GetName() == "__name__" {
-				metricName = label.GetValue()
-			} else {
-				labelMap[label.Name] = label.Value
-			}
-		}
-
-		captured := s.Samples[0].Value
+		metricName, labelMap := metricNameAndLabelMap(s)
 
 		var collector prometheus.Collector
 
 		switch promSeriesWithType.Type {
 		case metrics.Counter:
+			captured := s.Samples[0].Value
 			collector = prometheus.NewCounterFunc(prometheus.CounterOpts{
 				Name:        metricName,
 				ConstLabels: labelMap,
@@ -261,19 +252,35 @@ func (o *Output) flush() {
 				return captured
 			})
 		case metrics.Gauge:
+			captured := s.Samples[0].Value
 			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 				Name:        metricName,
 				ConstLabels: labelMap,
 			}, func() float64 {
 				return captured
 			})
+		case metrics.Rate:
+			captured := s.Samples[0].Value
+			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name:        metricName,
+				ConstLabels: labelMap,
+			}, func() float64 {
+				return captured
+			})
+		case metrics.Trend:
+			for _, swm := range o.tsdb {
+				if strings.Contains(metricName, swm.Metric.Name) {
+					collector = swm.Measure.(*nativeHistogramSink).H
+					break
+				}
+			}
 		default:
-			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-				Name:        metricName,
-				ConstLabels: labelMap,
-			}, func() float64 {
-				return captured
-			})
+			panic(
+				fmt.Sprintf(
+					"unhandled metric type `%s`",
+					promSeriesWithType.Type,
+				),
+			)
 		}
 
 		collectors = append(collectors, collector)
@@ -299,6 +306,19 @@ func (o *Output) flush() {
 		o.logger.WithError(err).Error("Failed to send the time series data to the endpoint")
 		return
 	}
+}
+
+func metricNameAndLabelMap(s *prompb.TimeSeries) (string, map[string]string) {
+	var metricName string
+	labelMap := make(map[string]string)
+	for _, label := range s.Labels {
+		if label.GetName() == namelbl {
+			metricName = label.GetValue()
+		} else {
+			labelMap[label.Name] = label.Value
+		}
+	}
+	return metricName, labelMap
 }
 
 func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) []prompbSeriesWithType {
@@ -458,7 +478,7 @@ func newSeriesWithMeasure(
 	case metrics.Trend:
 		// TODO: refactor encapsulating in a factory method
 		if trendAsNativeHistogram {
-			sink = newNativeHistogramSink(series.Metric)
+			sink = newNativeHistogramSink(&series)
 		} else {
 			var err error
 			sink, err = newExtendedTrendSink(tsr)

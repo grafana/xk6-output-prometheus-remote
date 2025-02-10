@@ -107,13 +107,15 @@ func TestTrendAsGaugesFindIxName(t *testing.T) {
 func TestNativeHistogramSinkAdd(t *testing.T) {
 	t.Parallel()
 
+	r := metrics.NewRegistry()
 	ts := metrics.TimeSeries{
 		Metric: &metrics.Metric{
 			Name:     "k6_test_metric",
 			Contains: metrics.Time,
 		},
+		Tags: r.RootTagSet(),
 	}
-	sink := newNativeHistogramSink(ts.Metric)
+	sink := newNativeHistogramSink(&ts)
 
 	// k6 passes time values with ms time unit
 	// the sink converts them to seconds.
@@ -142,7 +144,7 @@ func TestNativeHistogramSinkMapPrompb(t *testing.T) {
 		Tags: r.RootTagSet().With("tagk1", "tagv1"),
 	}
 
-	st := newNativeHistogramSink(series.Metric)
+	st := newNativeHistogramSink(&series)
 	st.Add(metrics.Sample{
 		TimeSeries: series,
 		Value:      1.52,
@@ -196,7 +198,7 @@ func TestNativeHistogramSinkMapPrompbWithValueType(t *testing.T) {
 		Tags: r.RootTagSet(),
 	}
 
-	st := newNativeHistogramSink(series.Metric)
+	st := newNativeHistogramSink(&series)
 	st.Add(metrics.Sample{
 		TimeSeries: series,
 		Value:      1.52,
@@ -230,7 +232,14 @@ func BenchmarkHistogramSinkAdd(b *testing.B) {
 		Type:     metrics.Trend,
 		Contains: metrics.Time,
 	}
-	ts := newNativeHistogramSink(m)
+
+	r := metrics.NewRegistry()
+	series := metrics.TimeSeries{
+		Metric: m,
+		Tags:   r.RootTagSet(),
+	}
+
+	ts := newNativeHistogramSink(&series)
 	s := metrics.Sample{
 		TimeSeries: metrics.TimeSeries{
 			Metric: m,
