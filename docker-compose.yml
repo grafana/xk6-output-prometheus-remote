@@ -14,6 +14,8 @@ services:
       - k6
     ports:
       - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
 
   grafana:
     image: grafana/grafana:10.1.2
@@ -27,3 +29,10 @@ services:
       - GF_AUTH_BASIC_ENABLED=false
     volumes:
       - ./grafana:/etc/grafana/provisioning/
+
+  pushgateway:
+    image: prom/pushgateway:v1.11.0
+    networks:
+      - k6
+    ports:
+      - "9091:9091"
