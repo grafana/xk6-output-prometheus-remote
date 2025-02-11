@@ -128,21 +128,12 @@ type nativeHistogramSink struct {
 func newNativeHistogramSink(ts *metrics.TimeSeries) *nativeHistogramSink {
 	// Create histogram with exportable name and labels, as this instance is
 	// exported as is when exporting to a pushgateway
-	suffix := baseUnit(ts.Metric.Contains)
-	labels := MapSeries(*ts, suffix)
-	constLabels := make(map[string]string, len(labels))
-	var metricName string
-	for _, label := range labels {
-		if label.Name == namelbl {
-			metricName = label.Value
-		} else {
-			constLabels[label.Name] = label.Value
-		}
-	}
+	metricName, labels := makeLabels(ts)
+
 	return &nativeHistogramSink{
 		H: prometheus.NewHistogram(prometheus.HistogramOpts{
 			Name:        metricName,
-			ConstLabels: constLabels,
+			ConstLabels: labels,
 			// 1.1 is the starting value suggested by Prometheus'
 			// It sounds good considering the general purpose
 			// it have to address.
@@ -151,6 +142,22 @@ func newNativeHistogramSink(ts *metrics.TimeSeries) *nativeHistogramSink {
 			NativeHistogramBucketFactor: 1.1,
 		}),
 	}
+}
+
+func makeLabels(ts *metrics.TimeSeries) (string, map[string]string) {
+	suffix := baseUnit(ts.Metric.Contains)
+	pbLabels := MapSeries(*ts, suffix)
+	var metricName string
+	labels := make(map[string]string, len(pbLabels))
+	for _, label := range pbLabels {
+		if label.Name == namelbl {
+			metricName = label.Value
+		} else {
+			labels[label.Name] = label.Value
+		}
+	}
+
+	return metricName, labels
 }
 
 func (sink *nativeHistogramSink) Add(s metrics.Sample) {
@@ -211,6 +218,7 @@ func (sink *nativeHistogramSink) MapPrompb(series metrics.TimeSeries, t time.Tim
 				},
 			},
 			Type: metrics.Trend,
+			hist: &sink.H,
 		},
 	}
 }

@@ -165,6 +165,9 @@ func TestNativeHistogramSinkMapPrompb(t *testing.T) {
 
 	expected := `{"labels":[{"name":"__name__","value":"k6_test"},{"name":"tagk1","value":"tagv1"}],"histograms":[{"countInt":"2","positiveDeltas":["1","0"],"positiveSpans":[{"length":1,"offset":5},{"length":1,"offset":8}],"schema":3,"sum":4.66,"timestamp":"3000","zeroCountInt":"0","zeroThreshold":2.938735877055719e-39}]}`
 	assert.JSONEq(t, expected, string(b))
+
+	assert.NotNil(t, ts[0].hist)
+	assert.Equal(t, `Desc{fqName: "k6_test", help: "", constLabels: {tagk1="tagv1"}, variableLabels: []}`, (*ts[0].hist).Desc().String())
 }
 
 func BenchmarkK6TrendSinkAdd(b *testing.B) {

@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/push"
 	"strings"
 	"time"
 
@@ -33,7 +32,8 @@ type Output struct {
 	trendStatsResolver map[string]func(*metrics.TrendSink) float64
 
 	// TODO: copy the prometheus/remote.WriteClient interface and depend on it
-	client *remote.WriteClient
+	client    *remote.WriteClient
+	pgwClient *remote.RegistryPusher
 }
 
 // New creates a new Output instance.
@@ -50,14 +50,24 @@ func New(params output.Params) (*Output, error) {
 		return nil, err
 	}
 
-	wc, err := remote.NewWriteClient(config.ServerURL.String, clientConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize the Prometheus remote write client: %w", err)
+	var pgwc remote.RegistryPusher
+	var wc *remote.WriteClient
+	if config.UsePushgateway.Bool {
+		pgwc, err = remote.NewPushgatewayClient(config.ServerURL.String, config.PushgatewayJob.String, clientConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize the Prometheus Pushgateway client: %w", err)
+		}
+	} else {
+		wc, err = remote.NewWriteClient(config.ServerURL.String, clientConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize the Prometheus remote write client: %w", err)
+		}
 	}
 
 	o := &Output{
-		client: wc,
-		config: config,
+		client:    wc,
+		pgwClient: &pgwc,
+		config:    config,
 		// TODO: consider to do this function millisecond-based
 		// so we don't need to truncate all the time we invoke it.
 		// Before we should analyze if in some cases is it useful to have it in ns.
@@ -97,7 +107,9 @@ func (o *Output) Stop() error {
 	defer o.logger.Debug("Output stopped")
 	o.periodicFlusher.Stop()
 
-	if !o.config.StaleMarkers.Bool {
+	if !o.config.StaleMarkers.Bool || o.config.UsePushgateway.Bool {
+		// Don't write stale markers for pushgateway, as this could result in
+		// data loss if pushgateway hasn't been crawled yet
 		return nil
 	}
 	staleMarkers := o.staleMarkers()
@@ -228,15 +240,43 @@ func (o *Output) flush() {
 	// Prometheus write handler processes only some fields as of now, so here we'll add only them.
 
 	promTimeSeriesWithType := o.convertToPbSeries(samplesContainers)
+	nts = len(promTimeSeriesWithType)
+	o.logger.WithField("nts", nts).Debug("Converted samples to Prometheus TimeSeries")
 
-	collectors := make([]prometheus.Collector, 0, len(promTimeSeriesWithType))
-	registry := prometheus.NewPedanticRegistry()
-	pusher := push.New("http://localhost:9091", "db_backup").
-		Gatherer(registry)
+	if o.pgwClient != nil {
+		o.flushToPushgateway(promTimeSeriesWithType)
+	} else {
+		if o.client == nil {
+			o.logger.Error("Remote write client is not initialized")
+			return
+		}
+		o.flushToRemoteWrite(promTimeSeriesWithType)
+	}
+}
+
+func (o *Output) flushToPushgateway(promTimeSeriesWithType []prompbSeriesWithType) {
+	registries := o.convertToPromRegistries(promTimeSeriesWithType)
+	if err := (*o.pgwClient).Push(context.Background(), registries); err != nil {
+		o.logger.WithError(err).Error("Failed to send the time series data to the endpoint")
+	}
+}
+
+func (o *Output) flushToRemoteWrite(promTimeSeriesWithType []prompbSeriesWithType) {
+	promTimeSeries := make([]*prompb.TimeSeries, len(promTimeSeriesWithType))
+	for i, seriesWithType := range promTimeSeriesWithType {
+		promTimeSeries[i] = seriesWithType.Series
+	}
+
+	if err := o.client.Store(context.Background(), promTimeSeries); err != nil {
+		o.logger.WithError(err).Error("Failed to send the time series data to the endpoint")
+	}
+}
+
+func (o *Output) convertToPromRegistries(promTimeSeriesWithType []prompbSeriesWithType) []*prometheus.Registry {
+	registries := make([]*prometheus.Registry, 0, len(promTimeSeriesWithType))
 
 	for _, promSeriesWithType := range promTimeSeriesWithType {
 		s := promSeriesWithType.Series
-		fmt.Printf("Labels: %s, samples %s, histogram %s\n", s.Labels, s.Samples, s.Histograms)
 
 		metricName, labelMap := metricNameAndLabelMap(s)
 
@@ -245,67 +285,49 @@ func (o *Output) flush() {
 		switch promSeriesWithType.Type {
 		case metrics.Counter:
 			captured := s.Samples[0].Value
-			collector = prometheus.NewCounterFunc(prometheus.CounterOpts{
-				Name:        metricName,
-				ConstLabels: labelMap,
-			}, func() float64 {
-				return captured
-			})
-		case metrics.Gauge:
+			collector = prometheus.NewCounterFunc(
+				prometheus.CounterOpts{
+					Name:        metricName,
+					ConstLabels: labelMap,
+				},
+				func() float64 {
+					return captured
+				})
+		case metrics.Gauge, metrics.Rate:
 			captured := s.Samples[0].Value
-			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-				Name:        metricName,
-				ConstLabels: labelMap,
-			}, func() float64 {
-				return captured
-			})
-		case metrics.Rate:
-			captured := s.Samples[0].Value
-			collector = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-				Name:        metricName,
-				ConstLabels: labelMap,
-			}, func() float64 {
-				return captured
-			})
+			collector = prometheus.NewGaugeFunc(
+				prometheus.GaugeOpts{
+					Name:        metricName,
+					ConstLabels: labelMap,
+				},
+				func() float64 {
+					return captured
+				})
 		case metrics.Trend:
-			for _, swm := range o.tsdb {
-				if strings.Contains(metricName, swm.Metric.Name) {
-					collector = swm.Measure.(*nativeHistogramSink).H
-					break
-				}
-			}
+			// happens only for native histograms
+			collector = *promSeriesWithType.hist
 		default:
 			panic(
 				fmt.Sprintf(
-					"unhandled metric type `%s`",
+					"unhandled metric type %s",
 					promSeriesWithType.Type,
 				),
 			)
 		}
 
-		collectors = append(collectors, collector)
-		registry.Register(collector)
+		// Create a new registry for each metric. This approach is required because the samples may include
+		// metrics with the same name but a different number or combination of labels. The Prometheus registry
+		// enforces that metrics with the same name must share the same label structure.
+		// To circumvent this limitation, we use separate registries for each metric.
+		registry := prometheus.NewRegistry()
+		if err := registry.Register(collector); err != nil {
+			o.logger.WithError(err).Errorf("Failed to register prometheus function for metric %s", metricName)
+		}
+
+		registries = append(registries, registry)
 	}
 
-	// registry.MustRegister(collectors...)
-
-	if err := pusher.
-		Add(); err != nil {
-		fmt.Println("Could not push completion time to Pushgateway:", err)
-	}
-
-	nts = len(promTimeSeriesWithType)
-	o.logger.WithField("nts", nts).Debug("Converted samples to Prometheus TimeSeries")
-
-	promTimeSeries := make([]*prompb.TimeSeries, len(promTimeSeriesWithType))
-	for i, seriesWithType := range promTimeSeriesWithType {
-		promTimeSeries[i] = seriesWithType.Series
-	}
-
-	if err := o.client.Store(context.Background(), promTimeSeries); err != nil {
-		o.logger.WithError(err).Error("Failed to send the time series data to the endpoint")
-		return
-	}
+	return registries
 }
 
 func metricNameAndLabelMap(s *prompb.TimeSeries) (string, map[string]string) {
@@ -389,6 +411,8 @@ func (o *Output) convertToPbSeries(samplesContainers []metrics.SampleContainer) 
 type prompbSeriesWithType struct {
 	Series *prompb.TimeSeries
 	Type   metrics.MetricType
+	// only filled for native histograms metrics where Type == Trend
+	hist *prometheus.Histogram
 }
 
 type seriesWithMeasure struct {
