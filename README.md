@@ -1,7 +1,7 @@
 # xk6-output-prometheus-remote
 
 > [!WARNING]
-> The `xk6-output-prometheus-remote` extension [has been merged](https://github.com/grafana/k6/pull/4519) to the [main k6 repository](https://github.com/grafana/k6). Please contribute and [open issues there](https://github.com/grafana/k6/issues). This repository is no longer maintained.
+> The `xk6-output-prometheus-remote` extension [has been merged](https://github.com/grafana/k6/pull/4519) to the [main k6 repository](https://github.com/grafana/k6). Please contribute and [open issues there](https://github.com/grafana/k6/issues). This repository is no longer maintained and it will be soon archived.
 
 The `xk6-output-prometheus-remote` extension allows you to publish test-run metrics to Prometheus via Remote Write endpoint.
 
